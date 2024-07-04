@@ -1,0 +1,62 @@
+<div>
+  <table>
+    <tr>
+      <td style="width:30%;vertical-align: top;">
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th colspan="4" style="font-size: 16px;">{{ title }}</th>
+            </tr>
+            <tr>
+              <th scope="col">#</th>
+              <!-- <th scope="col" style="text-align: left;">Document ID</th> -->
+              <th scope="col" style="text-align: left;">Document Title</th>
+              <!-- <th scope="col" style="text-align: left;">File Name</th> -->
+              <th scope="col" style="text-align: left;">File URL</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let document of documents;let i = index">
+              <th scope="row">{{ i + 1 }}</th>
+              <!-- <td style="text-align: left;">{{ document.DocumentId }}</td> -->
+              <td style="text-align: left;">{{ document.DocumentName }}</td>
+              <!-- <td style="text-align: left;">{{ document.DocumentFileName }}</td> -->
+              <td style="text-align: left;"><a href="{{ document.DocumentURL }}">Link to document</a></td>
+            </tr>
+          </tbody>
+        </table>
+      </td>
+      <td>&nbsp;</td>
+      <td style="width:70%;text-align: left;vertical-align: top;">
+        <!-- <span>Environment:{{ currentEnv }}</span> -->
+        <span><b>Type in your query:</b></span><input title="searchQuery" type="text" [formControl]="searchControl" style="text-align: left;width:100%" /><button mat-raised-button color="primary" (click)="searchArbDocs()">Search</button>
+        <table class="table table-striped" *ngIf = "showSearchResults">
+          <thead>
+            <tr>
+              <th colspan="4" style="font-size: 16px;">Search Results</th>
+            </tr>
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col" style="text-align: left;">Answer</th>
+              <th scope="col" style="text-align: left;">Similarity (%)</th>
+              <th scope="col" style="text-align: left;">ARB Document</th>
+              <th scope="col" style="text-align: left;">Document URL</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let result of searchResult;let i = index">
+              <th scope="row">{{ i + 1 }}</th>
+              <td style="text-align: left;">{{ result.Answer }}</td>
+              <td style="text-align: left;">{{ result.Similarity }}</td>
+              <td style="text-align: left;">{{ result.DocumentTitle }}</td>
+              <td style="text-align: left;"><a href="{{ result.DocumentURL }}">Link to document</a></td>
+            </tr>
+          </tbody>
+        </table>
+        <p><span style="color:red">{{ callerror }}</span></p>
+      </td>
+    </tr>
+  </table>
+</div>
+
+<router-outlet></router-outlet>
