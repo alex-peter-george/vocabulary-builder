@@ -10,25 +10,25 @@
             <tr>
               <th scope="col">#</th>
               <!-- <th scope="col" style="text-align: left;">Document ID</th> -->
-              <th scope="col" style="text-align: left;">Document Title</th>
+              <th scope="col" style="text-align: left;">Word</th>
               <!-- <th scope="col" style="text-align: left;">File Name</th> -->
-              <th scope="col" style="text-align: left;">File URL</th>
+              <th scope="col" style="text-align: left;">Stem</th>
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let document of documents;let i = index">
+            <tr *ngFor="let expression of expressions;let i = index">
               <th scope="row">{{ i + 1 }}</th>
               <!-- <td style="text-align: left;">{{ document.DocumentId }}</td> -->
-              <td style="text-align: left;">{{ document.DocumentName }}</td>
-              <!-- <td style="text-align: left;">{{ document.DocumentFileName }}</td> -->
-              <td style="text-align: left;"><a href="{{ document.DocumentURL }}">Link to document</a></td>
+              <td style="text-align: left;">{{ expression.word }}</td>
+              <td style="text-align: left;">{{ expression.stem }}</td>
+              <!-- <td style="text-align: left;"><a href="{{ document.DocumentURL }}">Link to document</a></td> -->
             </tr>
           </tbody>
         </table>
       </td>
-      <td>&nbsp;</td>
+      <!-- <td>&nbsp;</td>
       <td style="width:70%;text-align: left;vertical-align: top;">
-        <!-- <span>Environment:{{ currentEnv }}</span> -->
+        <span>Environment:{{ currentEnv }}</span>
         <span><b>Type in your query:</b></span><input title="searchQuery" type="text" [formControl]="searchControl" style="text-align: left;width:100%" /><button mat-raised-button color="primary" (click)="searchArbDocs()">Search</button>
         <table class="table table-striped" *ngIf = "showSearchResults">
           <thead>
@@ -54,7 +54,7 @@
           </tbody>
         </table>
         <p><span style="color:red">{{ callerror }}</span></p>
-      </td>
+      </td> -->
     </tr>
   </table>
 </div>

@@ -10,33 +10,38 @@ import * as Papa from 'papaparse';
 })
 
 export class DataService {
-  private docsTestUrl = 'http://localhost:7071/api/arb_docs_list';
-  private searchTestUrl = "http://localhost:7071/api/search_by_query"
+  private wordsTestUrl = 'http://localhost:7071/api/expression_list';
+  // private searchTestUrl = "http://localhost:7071/api/search_by_query"
   
-  private docsUrl = 'https://arb-ai-search-api.azurewebsites.net/api/arb_docs_list?code=LCQGNiSKpsntUfFGOHVHpwk4HjR8xuxt1BgvDUDQjyL0AzFur4Lh5Q%3D%3D';
-  private searchUrl = 'https://arb-ai-search-api.azurewebsites.net/api/search_by_query?code=ZTnVI5mWprrPXW-AN8xgl3yiPhbz9zPjT3cJEeqz6vliAzFuo_4tUA%3D%3D';
+  private wordsUrl = 'https://arb-ai-search-api.azurewebsites.net/api/arb_docs_list?code=LCQGNiSKpsntUfFGOHVHpwk4HjR8xuxt1BgvDUDQjyL0AzFur4Lh5Q%3D%3D';
+  // private searchUrl = 'https://arb-ai-search-api.azurewebsites.net/api/search_by_query?code=ZTnVI5mWprrPXW-AN8xgl3yiPhbz9zPjT3cJEeqz6vliAzFuo_4tUA%3D%3D';
     
   constructor(private http: HttpClient) {}
 
-  fetchTestDocList(): Observable<any> {
-    return this.http.get(this.docsTestUrl);
-  }
+  // fetchTestWordsList(): Observable<any> {
+  //   return this.http.get(this.wordsTestUrl);
+  // }
 
-  async fetchDocList() {
-    const r = await fetch(this.docsUrl);
+  async fetchTestWordsList() {
+    const r = await fetch(this.wordsTestUrl);
     return await r.json();
   }
 
-  fetchTestSearch(query_string: any) : Observable<any> {
-    const body = { query: query_string };
-    return this.http.post(this.searchTestUrl, body);
+  async fetchWordsList() {
+    const r = await fetch(this.wordsUrl);
+    return await r.json();
   }
 
-  fetchSearch(query_string: any): Observable<any> {
-    const body = { query: query_string };
-    console.log(`Production Search URL is ${this.searchUrl}`)
-    return this.http.post(this.searchUrl, body);
-  }
+  // fetchTestSearch(query_string: any) : Observable<any> {
+  //   const body = { query: query_string };
+  //   return this.http.post(this.searchTestUrl, body);
+  // }
+
+  // fetchSearch(query_string: any): Observable<any> {
+  //   const body = { query: query_string };
+  //   console.log(`Production Search URL is ${this.searchUrl}`)
+  //   return this.http.post(this.searchUrl, body);
+  // }
 
   serializeError(error: HttpErrorResponse): string {
     const serializedError = {
