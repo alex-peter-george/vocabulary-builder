@@ -1,11 +1,11 @@
 <div>
   <table>
     <tr>
-      <td style="width:30%;vertical-align: top;">
+      <td style="width:20%;vertical-align: top;">
         <table class="table table-striped">
           <thead>
             <tr>
-              <th colspan="4" style="font-size: 16px;">{{ title }}</th>
+              <th colspan="3" style="font-size: 16px;">{{ title }}</th>
             </tr>
             <tr>
               <th scope="col">#</th>
@@ -26,35 +26,29 @@
           </tbody>
         </table>
       </td>
-      <!-- <td>&nbsp;</td>
+      <td>&nbsp;</td>
       <td style="width:70%;text-align: left;vertical-align: top;">
-        <span>Environment:{{ currentEnv }}</span>
-        <span><b>Type in your query:</b></span><input title="searchQuery" type="text" [formControl]="searchControl" style="text-align: left;width:100%" /><button mat-raised-button color="primary" (click)="searchArbDocs()">Search</button>
+        <button mat-raised-button color="primary" (click)="selectWordRandomly()"><b>Select expression randomly</b></button>
+        <button mat-raised-button color="primary" (click)="showDictionaryDefinition()"><b>Show dictionary definition</b></button>
+        <span style="width:100px">&nbsp;&nbsp;&nbsp;&nbsp;</span>(Environment:{{ currentEnv }})
         <table class="table table-striped" *ngIf = "showSearchResults">
           <thead>
             <tr>
-              <th colspan="4" style="font-size: 16px;">Search Results</th>
-            </tr>
-            <tr>
-              <th scope="col">#</th>
-              <th scope="col" style="text-align: left;">Answer</th>
-              <th scope="col" style="text-align: left;">Similarity (%)</th>
-              <th scope="col" style="text-align: left;">ARB Document</th>
-              <th scope="col" style="text-align: left;">Document URL</th>
+              <th scope="col" style="text-align: left;">Word</th>
+              <th scope="col" style="text-align: left;">Stem</th>
+              <th scope="col" style="text-align: left;">Dictionary Definition</th>
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let result of searchResult;let i = index">
-              <th scope="row">{{ i + 1 }}</th>
-              <td style="text-align: left;">{{ result.Answer }}</td>
-              <td style="text-align: left;">{{ result.Similarity }}</td>
-              <td style="text-align: left;">{{ result.DocumentTitle }}</td>
-              <td style="text-align: left;"><a href="{{ result.DocumentURL }}">Link to document</a></td>
+            <tr>
+              <td style="text-align: left;">{{ selectedExpression.word }}</td>
+              <td style="text-align: left;">{{ selectedExpression.stem }}</td>
+              <td style="text-align: left;">{{ selectedExpression.dictionaryDef }}</td>
             </tr>
           </tbody>
         </table>
         <p><span style="color:red">{{ callerror }}</span></p>
-      </td> -->
+      </td>
     </tr>
   </table>
 </div>
