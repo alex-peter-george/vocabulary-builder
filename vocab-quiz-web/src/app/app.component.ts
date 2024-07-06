@@ -9,13 +9,17 @@ import { startWith, debounceTime, switchMap } from 'rxjs/operators';
 
 
 class Expression {
+  
   word: string;
 	stem: string;
-  dictionaryDef: string;
+  dicscore: number;
+  openaiscore: number;
   constructor(){
     this.word = '';
     this.stem = '';
-    this.dictionaryDef = '';
+    this.dicscore = 0.10;
+    this.openaiscore = 0.10;
+    // this.dictionaryDef = '';
   }
 }
 
@@ -26,7 +30,7 @@ class Expression {
 })
 
 export class AppComponent implements OnInit {
-  title = "List of Words and Expressions";
+  title = "List of selected words and expressions";
   public expressions: Expression[] = [];
   searchControl = new FormControl('');
   public selectedExpression: Expression = new Expression();
@@ -39,15 +43,15 @@ export class AppComponent implements OnInit {
 
   ngOnInit() {
     this.callerror = '';
-    this.dataService.fetchWordsList().then(
-      (data) => {
-        this.expressions = data;
-      },
-      (error) => {
-        this.callerror = error;
-        console.error(error);
-      }
-    );
+    // this.dataService.fetchWordsList().then(
+    //   (data) => {
+    //     this.expressions = data;
+    //   },
+    //   (error) => {
+    //     this.callerror = error;
+    //     console.error(error);
+    //   }
+    // );
   }
 
   async selectWordRandomly() {
@@ -65,14 +69,16 @@ export class AppComponent implements OnInit {
           this.showSearchResults = true;
           this.selectedExpression.word = jsonObj['word'];
           this.selectedExpression.stem = jsonObj['stem'];
-          this.dataService.postDictionaryDef(jsonObj['word'], environment.DICTIONARYDEF).then(
-            response => {
-              this.selectedExpression.dictionaryDef = JSON.parse(response)["meanings"];
-            },
-            error => {
-              this.selectedExpression.dictionaryDef = "Error reading Free Dictionary API";
-            }
-          );
+          // this.dataService.postDictionaryDef(jsonObj['word'], environment.DICTIONARYDEF).then(
+          //   response => {
+          //     this.selectedExpression.dictionaryDef = JSON.parse(response)["meanings"];
+          //   },
+          //   error => {
+          //     this.selectedExpression.dictionaryDef = "Error reading Free Dictionary API";
+          //   }
+          // );
+
+          this.expressions.push({word: jsonObj['word'],stem: jsonObj['stem'],dicscore:0.10,openaiscore:0.10});
         }
         catch{
           this.showSearchResults = false;
@@ -88,7 +94,7 @@ export class AppComponent implements OnInit {
     
   }
 
-  async showDictionaryDefinition() {
+  async startNewQuiz() {
     console.log(`Running environment is set to ${environment.ENVIRONMENT}`)
 
     var query_str = this.searchControl.value;
