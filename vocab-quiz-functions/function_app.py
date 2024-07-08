@@ -94,7 +94,7 @@ def expression_dictionary_definition(req: func.HttpRequest) -> func.HttpResponse
         
 
     # Make a GET request to the API
-    response = requests.get(f'https://api.dictionaryapi.dev/api/v2/entries/en/{expression}',verify=False)
+    response = requests.get(f'{os.getenv('FREE_DICTIONAY_API_BASE_URL')}{expression}',verify=False)
 
     # Check if the request was successful
     
