@@ -94,7 +94,7 @@ def expression_dictionary_definition(req: func.HttpRequest) -> func.HttpResponse
         
 
     # Make a GET request to the API
-    response = requests.get(f'{os.getenv('FREE_DICTIONAY_API_BASE_URL')}{expression}',verify=False)
+    response = requests.get(f'{os.getenv("FREE_DICTIONAY_API_BASE_URL")}{expression}',verify=False)
 
     # Check if the request was successful
     
@@ -192,6 +192,35 @@ def word_stemming(req: func.HttpRequest) -> func.HttpResponse:
     # Serialize data to JSON
     return func.HttpResponse(
         body=json.dumps(word_stem),
+        mimetype="application/json",
+        status_code=200)
+
+@app.route(route="vocabulary_entries_count", auth_level=func.AuthLevel.FUNCTION)
+def vocabulary_entries_count(req: func.HttpRequest) -> func.HttpResponse:
+    logging.info(f'HTTP trigger function {inspect.currentframe().f_code.co_name} processed a request.')
+    
+    with open('data/VOCABULARY.csv', 'r') as file:
+        
+        words_no = 0
+        expressions_no = 0
+        
+        # Create a CSV reader
+        reader = csv.reader(file)
+            
+        # Loop over each row in the file
+        skipfirst = True
+        for row in reader:
+            if skipfirst:
+                skipfirst = False
+                continue
+            if ' ' in row[0]:
+                expressions_no = expressions_no + 1
+            else:
+                words_no = words_no + 1
+
+    # Serialize data to JSON
+    return func.HttpResponse(
+        body=json.dumps({'word_count' : words_no, 'expression_count' : expressions_no, 'total_entries' : words_no + expressions_no}),
         mimetype="application/json",
         status_code=200)
 
