@@ -14,6 +14,7 @@ import jasmine from 'jasmine';
 export class DataService {
   private wordsUrl = environment.WORDSURL;
   private randomWordUrl = environment.RANDOMWORDURL;
+  private simScoresUrl = environment.SIMSCORESURL;
   private postResponse = '';
       
   constructor(private http: HttpClient) {}
@@ -30,6 +31,20 @@ export class DataService {
   
   async postDictionaryDef(word: string, url: string) : Promise<string> {
     this.http.post(url, {"expression" : word}).subscribe(
+      response => {
+        console.log('Data sent successfully:', response);
+        this.postResponse = JSON.stringify(response);
+      },
+      error => {
+        console.error('Error sending data:', error);
+        this.postResponse = "error";
+      }
+    );
+    return this.postResponse;
+  }
+
+  async postResultGetScores(word: string, user_answer: string) : Promise<string> {
+    this.http.post(this.simScoresUrl, {"expression" : word, "user_answer" : user_answer}).subscribe(
       response => {
         console.log('Data sent successfully:', response);
         this.postResponse = JSON.stringify(response);

@@ -123,6 +123,30 @@ export class AppComponent implements OnInit {
     );
   
   }
+
+  async submitUserAnswer() {
+    console.log(`Running environment is set to ${environment.ENVIRONMENT}`)
+
+    var query_str = this.searchControl.value;
+    this.callerror = '';
+    this.showSearchResults = false;
+    
+    this.dataService.postDictionaryDef(jsonObj['word'], environment.DICTIONARYDEF).then(
+        response => {
+          this.selectedExpression.dictionaryDef = JSON.parse(response)["meanings"];
+        },
+        error => {
+          if (error instanceof HttpErrorResponse)
+            this.callerror = this.dataService.serializeError(error);
+          else
+            this.callerror = error.message;
+        }
+      );
+
+    
+  
+  }
+  
 }
 
 
