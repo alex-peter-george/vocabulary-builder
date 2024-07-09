@@ -10,6 +10,8 @@ import os
 from dotenv import load_dotenv
 from nltk.stem import PorterStemmer
 from nltk.tokenize import word_tokenize
+from openai import AzureOpenAI
+from azure.identity import DefaultAzureCredential, get_bearer_token_provider
 
 load_dotenv()  # take environment variables from .env.
 
@@ -122,9 +124,15 @@ def expression_dictionary_definition(req: func.HttpRequest) -> func.HttpResponse
         mimetype="application/json",
         status_code=200)
 
+
+# get free photo links
+# https://unsplash.com/developers
+
 @app.route(route="expression_openai_definition", auth_level=func.AuthLevel.FUNCTION)
 def expression_openai_definition(req: func.HttpRequest) -> func.HttpResponse:
     logging.info(f'HTTP trigger function {inspect.currentframe().f_code.co_name} processed a request.')
+
+    load_dotenv()
 
     expression = req.params.get('expression')
     if not expression:
@@ -139,26 +147,38 @@ def expression_openai_definition(req: func.HttpRequest) -> func.HttpResponse:
                 mimetype="application/json",
                 status_code=200)
     
-    openai.api_key = os.getenv('AZURE_OPENAI_API_KEY')
-    openai.api_version = "2024-02-01"
-    openai.azure_endpoint = os.getenv('AZURE_OPENAI_ENDPOINT')
+    openai_endpoint = os.getenv('AZURE_OPENAI_ENDPOINT') 
+    deployment_name = os.getenv('DEPLOYMENT_NAME')
+    openai_key = os.getenv('AZURE_OPENAI_API_KEY')
+    openai_version = os.getenv('AZURE_OPENAI_API_VERSION')
+    openai_url = f'{openai_endpoint}openai/deployments/{deployment_name}/chat/completions?api-version={openai_version}&api-key={openai_key}'
 
-    # Use the GPT-3 API to generate a summary
-    response = openai.chat.completions.create(
-        model="gpt-35-turbo",
-        messages=[
-                {"role": "system", "content": "You are a helpful assistant that provides meanings of an English language word or expression."},
-                {"role": "user", "content": f"{expression}"},
-            ],
-    )
-    meanings = response.choices[0].message.content
+    if ' ' in expression:
+        prompt = f'Define the expression \'{expression}\' and list a few examples that use it.'
+    else:
+        prompt = f'Define the word \'{expression}\' and list a few examples that use it; attach a few links to a set of relevant photos as well.'
+       
+    payload_str = '{"messages": [{"role": "user","content":"'
+    payload_str += prompt
+    payload_str += '"}],"temperature": 0.7,"top_p": 0.95,"frequency_penalty": 0,"presence_penalty": 0,"max_tokens": 800,"stop": "null"}'
+    
+    # Define the headers
+    headers = {
+        'Content-Type': 'application/json',  # This is a common header, replace as needed
+        # 'Authorization': 'Bearer YOUR_TOKEN'  # Replace 'YOUR_TOKEN' with your token
+    }
+    response = requests.post(openai_url, headers=headers, data=payload_str)
+
+    response_json = json.loads(response.text)
+    openai_answer = response_json['choices'][0]['message']['content']
     
     # Serialize data to JSON
-    json_data = json.dumps(meanings)
+    json_data = json.dumps(openai_answer)
     return func.HttpResponse(
         body=json_data,
         mimetype="application/json",
         status_code=200)
+    
 
 @app.route(route="word_stemming", auth_level=func.AuthLevel.FUNCTION)
 def word_stemming(req: func.HttpRequest) -> func.HttpResponse:
