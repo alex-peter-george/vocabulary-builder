@@ -131,17 +131,17 @@ export class AppComponent implements OnInit {
     this.callerror = '';
     this.showSearchResults = false;
     
-    this.dataService.postDictionaryDef(jsonObj['word'], environment.DICTIONARYDEF).then(
-        response => {
-          this.selectedExpression.dictionaryDef = JSON.parse(response)["meanings"];
-        },
-        error => {
-          if (error instanceof HttpErrorResponse)
-            this.callerror = this.dataService.serializeError(error);
-          else
-            this.callerror = error.message;
-        }
-      );
+    // this.dataService.postDictionaryDef(jsonObj['word'], environment.DICTIONARYDEF).then(
+    //     response => {
+    //       this.selectedExpression.dictionaryDef = JSON.parse(response)["meanings"];
+    //     },
+    //     error => {
+    //       if (error instanceof HttpErrorResponse)
+    //         this.callerror = this.dataService.serializeError(error);
+    //       else
+    //         this.callerror = error.message;
+    //     }
+    //   );
 
     
   

@@ -50,30 +50,37 @@ def random_expression(req: func.HttpRequest) -> func.HttpResponse:
     logging.info(f'HTTP trigger function {inspect.currentframe().f_code.co_name} processed a request.')
 
     result = []
-    with open(VOCABULARY_FILE, 'r') as file:
-        # Create a CSV reader
-        reader = csv.reader(file)
-    
-        # Loop over each row in the file
-        skipfirst = True
-        for row in reader:
-            if skipfirst:
-                skipfirst = False
-                continue
-            item = {}
-            item['word'] = row[1]
-            item['stem'] = row[2]
-            result.append(item)
+    rowno = 0
+    try:
+        with open(VOCABULARY_FILE, 'r') as file:
+            # Create a CSV reader
+            reader = csv.reader(file)
+        
+            # Loop over each row in the file
+            skipfirst = True
+            for row in reader:
+                if skipfirst:
+                    skipfirst = False
+                    continue
+                item = {}
+                item['word'] = row[0]
+                item['stem'] = row[1]
+                result.append(item)
+                rowno += 1
 
-    # Pick up random set from the array
-    random_word = random.choice(result)
+        # Pick up random set from the array
+        random_word = random.choice(result)
+        status_code = 200
+    except:
+        random_word = {"error" : f'At row_no {rowno}:{ValueError}'}
+        status_code = 500
 
     # Serialize data to JSON
     json_data = json.dumps(random_word)
     return func.HttpResponse(
         body=json_data,
         mimetype="application/json",
-        status_code=200)
+        status_code=status_code)
 
 @app.route(route="expression_dictionary_definition", auth_level=func.AuthLevel.FUNCTION)
 def expression_dictionary_definition(req: func.HttpRequest) -> func.HttpResponse:
