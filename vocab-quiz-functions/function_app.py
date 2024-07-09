@@ -99,7 +99,13 @@ def expression_dictionary_definition(req: func.HttpRequest) -> func.HttpResponse
     response = requests.get(f'{os.getenv("FREE_DICTIONAY_API_BASE_URL")}{expression}',verify=False)
 
     # Check if the request was successful
-    
+    if response.status_code == 404:
+        return func.HttpResponse(
+        body=json.loads(response.text)['title'],
+        mimetype="application/json",
+        status_code=404)    
+
+
     if response.status_code == 200:
         # Parse the response as JSON
         data = response.json()
@@ -114,15 +120,17 @@ def expression_dictionary_definition(req: func.HttpRequest) -> func.HttpResponse
         
         result['meanings'] = meanings
         result['synonyms'] = synonyms
+        status_code = 200
     else:
-        result['error'] = f'Request failed with status code {response.status_code}'
+        result['error'] = (response.text)['title']
+        status_code = response.status_code
 
     # Serialize data to JSON
     json_data = json.dumps(result)
     return func.HttpResponse(
         body=json_data,
         mimetype="application/json",
-        status_code=200)
+        status_code=status_code)    
 
 
 # get free photo links
