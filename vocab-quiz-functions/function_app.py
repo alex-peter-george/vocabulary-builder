@@ -71,8 +71,8 @@ def random_expression(req: func.HttpRequest) -> func.HttpResponse:
         # Pick up random set from the array
         random_word = random.choice(result)
         status_code = 200
-    except:
-        random_word = {"error" : f'At row_no {rowno}:{ValueError}'}
+    except Exception as e:
+        random_word = {"error" : f'At row_no {rowno}:{e}'}
         status_code = 500
 
     # Serialize data to JSON
