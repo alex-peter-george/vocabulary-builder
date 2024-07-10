@@ -78,20 +78,20 @@
               </td>
             </tr>
             <tr><td>&nbsp;</td></tr>
-            <tr>
+            <tr *ngIf="showWordDefs">
               <td><b>Free Dictionary answer:</b></td>
             </tr>
-            <tr>
+            <tr *ngIf="showWordDefs">
               <td>
                 <textarea rows = "7" cols = "100" name = "description" title="dict_answer" readonly>
                   Free dictionary answer here...
                 </textarea>
               </td>
             </tr>
-            <tr>
+            <tr *ngIf="showWordDefs">
               <td><b>Open AI answer:</b></td>
             </tr>
-            <tr>
+            <tr *ngIf="showWordDefs">
               <td>
                 <textarea rows = "7" cols = "100" name = "description" title="dict_answer" readonly>
                   Open AI answer here...

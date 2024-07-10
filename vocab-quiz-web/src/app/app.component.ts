@@ -36,6 +36,7 @@ export class AppComponent implements OnInit {
   public selectedExpression: Expression = new Expression();
   public callerror: string = '';
   public showSearchResults: boolean = false;
+  public showWordDefs: boolean = false;
   public currentEnv: string = environment.ENVIRONMENT;
   
   constructor(private dataService: DataService) {
@@ -60,6 +61,7 @@ export class AppComponent implements OnInit {
     // var query_str = this.searchControl.value;
     this.callerror = '';
     this.showSearchResults = false;
+    this.showWordDefs = false;
     
     this.dataService.fetchRandomWord().then(
       (data) => {
@@ -100,6 +102,7 @@ export class AppComponent implements OnInit {
     var query_str = this.searchControl.value;
     this.callerror = '';
     this.showSearchResults = false;
+    this.showWordDefs = false;
     
     this.dataService.fetchRandomWord().then(
       (data) => {
@@ -130,6 +133,7 @@ export class AppComponent implements OnInit {
     var query_str = this.searchControl.value;
     this.callerror = '';
     this.showSearchResults = false;
+    this.showWordDefs = true;
     
     // this.dataService.postDictionaryDef(jsonObj['word'], environment.DICTIONARYDEF).then(
     //     response => {
