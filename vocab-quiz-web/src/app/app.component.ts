@@ -6,20 +6,25 @@ import { environment } from 'src/environment';
 import { plainToClass } from 'class-transformer';
 import { Observable } from 'rxjs';
 import { startWith, debounceTime, switchMap } from 'rxjs/operators';
+import { forkJoin } from 'rxjs';
 
 
 class Expression {
-  
   word: string;
 	stem: string;
   dicscore: number;
   openaiscore: number;
+  dictionaryDef: string;
+  openAiDef: string;
+  userDef: string;
   constructor(){
     this.word = '';
     this.stem = '';
     this.dicscore = 0.10;
     this.openaiscore = 0.10;
-    // this.dictionaryDef = '';
+    this.dictionaryDef = '';
+    this.openAiDef = '';
+    this.userDef = '';
   }
 }
 
@@ -33,32 +38,28 @@ export class AppComponent implements OnInit {
   title = "List of selected words and expressions";
   public expressions: Expression[] = [];
   searchControl = new FormControl('');
-  public selectedExpression: Expression = new Expression();
+  public selectedExpression: Expression;
   public callerror: string = '';
   public showSearchResults: boolean = false;
   public showWordDefs: boolean = false;
   public currentEnv: string = environment.ENVIRONMENT;
+  public freeDictionaryDef: string = '';
+  public openAiDef: string = '';
+  public quizStartTime: Date;
   
   constructor(private dataService: DataService) {
+    this.selectedExpression = new Expression();
+    this.quizStartTime = new Date();
   }
 
   ngOnInit() {
     this.callerror = '';
-    // this.dataService.fetchWordsList().then(
-    //   (data) => {
-    //     this.expressions = data;
-    //   },
-    //   (error) => {
-    //     this.callerror = error;
-    //     console.error(error);
-    //   }
-    // );
+
   }
 
   async selectWordRandomly() {
     console.log(`Running environment is set to ${environment.ENVIRONMENT}`)
 
-    // var query_str = this.searchControl.value;
     this.callerror = '';
     this.showSearchResults = false;
     this.showWordDefs = false;
@@ -69,18 +70,11 @@ export class AppComponent implements OnInit {
         try{
           const jsonObj = JSON.parse(jsonStr);
           this.showSearchResults = true;
+          this.selectedExpression = new Expression();
           this.selectedExpression.word = jsonObj['word'];
           this.selectedExpression.stem = jsonObj['stem'];
-          // this.dataService.postDictionaryDef(jsonObj['word'], environment.DICTIONARYDEF).then(
-          //   response => {
-          //     this.selectedExpression.dictionaryDef = JSON.parse(response)["meanings"];
-          //   },
-          //   error => {
-          //     this.selectedExpression.dictionaryDef = "Error reading Free Dictionary API";
-          //   }
-          // );
-
-          this.expressions.push({word: jsonObj['word'],stem: jsonObj['stem'],dicscore:0.10,openaiscore:0.10});
+          
+          this.expressions.push({word: jsonObj['word'],stem: jsonObj['stem'],dicscore:0.10,openaiscore:0.10, dictionaryDef:'', openAiDef: '', userDef:''});
         }
         catch{
           this.showSearchResults = false;
@@ -103,6 +97,7 @@ export class AppComponent implements OnInit {
     this.callerror = '';
     this.showSearchResults = false;
     this.showWordDefs = false;
+    this.quizStartTime = new Date();
     
     this.dataService.fetchRandomWord().then(
       (data) => {
@@ -134,10 +129,12 @@ export class AppComponent implements OnInit {
     this.callerror = '';
     this.showSearchResults = false;
     this.showWordDefs = true;
+    this.freeDictionaryDef = '<Wait for data to load...>';
+    this.openAiDef = '<Wait for data to load...>';
     
-    // this.dataService.postDictionaryDef(jsonObj['word'], environment.DICTIONARYDEF).then(
+    // this.dataService.postDictionaryDef(this.selectedExpression.word, environment.DICTIONARYDEFURL).then(
     //     response => {
-    //       this.selectedExpression.dictionaryDef = JSON.parse(response)["meanings"];
+    //       this.freeDictionaryDef = JSON.parse(response)["meanings"];
     //     },
     //     error => {
     //       if (error instanceof HttpErrorResponse)
@@ -146,6 +143,28 @@ export class AppComponent implements OnInit {
     //         this.callerror = error.message;
     //     }
     //   );
+
+    // this.dataService.postOpenAiDef(this.selectedExpression.word, environment.OPENAIDEFURL).then(
+    //     response => {
+    //       this.openAiDef = JSON.parse(response);
+    //     },
+    //     error => {
+    //       if (error instanceof HttpErrorResponse)
+    //         this.callerror = this.dataService.serializeError(error);
+    //       else
+    //         this.callerror = error.message;
+    //     }
+    //   );
+
+    let requestFreeDict = this.dataService.postDictionaryDef(this.selectedExpression.word, environment.DICTIONARYDEFURL);
+    let requestOpenAi = this.dataService.postOpenAiDef(this.selectedExpression.word, environment.OPENAIDEFURL);
+  
+    forkJoin([requestFreeDict, requestOpenAi]).subscribe(([requestFreeDict, requestOpenAi]) => {
+      console.log(requestFreeDict);
+      this.freeDictionaryDef = JSON.parse(requestFreeDict)["meanings"];
+      console.log(requestOpenAi);
+      this.openAiDef = JSON.parse(requestOpenAi);
+    });
 
     
   

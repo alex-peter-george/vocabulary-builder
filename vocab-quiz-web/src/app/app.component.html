@@ -40,8 +40,8 @@
       <td>&nbsp;</td>
       <td style="width:70%;text-align: left;vertical-align: top;">
         <button mat-raised-button color="primary" style="background-color:lightgrey;height:30px" (click)="selectWordRandomly()"><b>Select expression randomly</b></button>
-        <button mat-raised-button color="primary" style="background-color:lightgreen;height:30px" (click)="startNewQuiz()"><b>Start new quiz</b></button>
-        <span style="width:100px">&nbsp;&nbsp;&nbsp;&nbsp;</span>(Environment:<b>{{ currentEnv }}</b>)
+        <button mat-raised-button color="primary" style="background-color:lightgreen;height:30px" (click)="startNewQuiz()"><b>Start new quiz</b></button><br/><br/>
+        <span style="width:100px">&nbsp;&nbsp;&nbsp;&nbsp;</span>*** Quiz started on <b>{{ quizStartTime }}</b>,running on environment:<b>{{ currentEnv }}</b>
         <div style="text-align: left;">
           <table style="width:50%" class="table table-striped" *ngIf = "showSearchResults">
             <thead>
@@ -83,9 +83,7 @@
             </tr>
             <tr *ngIf="showWordDefs">
               <td>
-                <textarea rows = "7" cols = "100" name = "description" title="dict_answer" readonly>
-                  Free dictionary answer here...
-                </textarea>
+                <textarea rows = "7" cols = "100" name = "description" title="dict_answer" readonly style="text-align: left;">{{freeDictionaryDef}}</textarea>
               </td>
             </tr>
             <tr *ngIf="showWordDefs">
@@ -93,9 +91,7 @@
             </tr>
             <tr *ngIf="showWordDefs">
               <td>
-                <textarea rows = "7" cols = "100" name = "description" title="dict_answer" readonly>
-                  Open AI answer here...
-                </textarea>
+                <textarea rows = "7" cols = "100" name = "description" title="dict_answer" readonly>{{openAiDef}}</textarea>
               </td>
             </tr>
           </table>

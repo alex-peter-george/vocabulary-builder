@@ -43,6 +43,20 @@ export class DataService {
     return this.postResponse;
   }
 
+  async postOpenAiDef(word: string, url: string) : Promise<string> {
+    this.http.post(url, {"expression" : word}).subscribe(
+      response => {
+        console.log('Data sent successfully:', response);
+        this.postResponse = JSON.stringify(response);
+      },
+      error => {
+        console.error('Error sending data:', error);
+        this.postResponse = "error";
+      }
+    );
+    return this.postResponse;
+  }
+
   async postResultGetScores(word: string, user_answer: string) : Promise<string> {
     this.http.post(this.simScoresUrl, {"expression" : word, "user_answer" : user_answer}).subscribe(
       response => {
@@ -56,18 +70,6 @@ export class DataService {
     );
     return this.postResponse;
   }
-
-
-  // fetchTestSearch(query_string: any) : Observable<any> {
-  //   const body = { query: query_string };
-  //   return this.http.post(this.searchTestUrl, body);
-  // }
-
-  // fetchSearch(query_string: any): Observable<any> {
-  //   const body = { query: query_string };
-  //   console.log(`Production Search URL is ${this.searchUrl}`)
-  //   return this.http.post(this.searchUrl, body);
-  // }
 
   serializeError(error: HttpErrorResponse): string {
     const serializedError = {
