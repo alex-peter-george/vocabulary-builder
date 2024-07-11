@@ -70,7 +70,6 @@ export class AppComponent implements OnInit {
         try{
           const jsonObj = JSON.parse(jsonStr);
           this.showSearchResults = true;
-          this.selectedExpression = new Expression();
           this.selectedExpression.word = jsonObj['word'];
           this.selectedExpression.stem = jsonObj['stem'];
           
@@ -122,7 +121,7 @@ export class AppComponent implements OnInit {
   
   }
 
-  async submitUserAnswer() {
+  submitUserAnswer() {
     console.log(`Running environment is set to ${environment.ENVIRONMENT}`)
 
     var query_str = this.searchControl.value;
@@ -132,42 +131,46 @@ export class AppComponent implements OnInit {
     this.freeDictionaryDef = '<Wait for data to load...>';
     this.openAiDef = '<Wait for data to load...>';
     
-    // this.dataService.postDictionaryDef(this.selectedExpression.word, environment.DICTIONARYDEFURL).then(
-    //     response => {
-    //       this.freeDictionaryDef = JSON.parse(response)["meanings"];
-    //     },
-    //     error => {
-    //       if (error instanceof HttpErrorResponse)
-    //         this.callerror = this.dataService.serializeError(error);
-    //       else
-    //         this.callerror = error.message;
-    //     }
-    //   );
-
-    // this.dataService.postOpenAiDef(this.selectedExpression.word, environment.OPENAIDEFURL).then(
-    //     response => {
-    //       this.openAiDef = JSON.parse(response);
-    //     },
-    //     error => {
-    //       if (error instanceof HttpErrorResponse)
-    //         this.callerror = this.dataService.serializeError(error);
-    //       else
-    //         this.callerror = error.message;
-    //     }
-    //   );
-
-    let requestFreeDict = this.dataService.postDictionaryDef(this.selectedExpression.word, environment.DICTIONARYDEFURL);
-    let requestOpenAi = this.dataService.postOpenAiDef(this.selectedExpression.word, environment.OPENAIDEFURL);
-  
-    forkJoin([requestFreeDict, requestOpenAi]).subscribe(([requestFreeDict, requestOpenAi]) => {
-      console.log(requestFreeDict);
-      this.freeDictionaryDef = JSON.parse(requestFreeDict)["meanings"];
-      console.log(requestOpenAi);
-      this.openAiDef = JSON.parse(requestOpenAi);
-    });
-
+    this.dataService.postDictionaryDef(this.selectedExpression.word, environment.DICTIONARYDEFURL).then(
+        response => {
+          this.freeDictionaryDef = response["meanings"];
+        },
+        error => {
+          if (error instanceof HttpErrorResponse)
+            this.callerror = this.dataService.serializeError(error);
+          else
+            this.callerror = error.message;
+        }
+      );
     
+    this.dataService.postOpenAiDef(this.selectedExpression.word, environment.OPENAIDEFURL).then(
+        response => {
+          console.log('[OK][Angular client] Data received:', response);
+          this.openAiDef = response;
+        },
+        error => {
+          console.log('[Bad][Angular client] Error received:', error);
+          if (error instanceof HttpErrorResponse)
+            this.callerror = this.dataService.serializeError(error);
+          else
+            this.callerror = error.message;
+        }
+      );
+    
+    // let requestFreeDict = this.dataService.postDictionaryDef(this.selectedExpression.word, environment.DICTIONARYDEFURL);
+    // let requestOpenAi = this.dataService.postOpenAiDef(this.selectedExpression.word, environment.OPENAIDEFURL);
   
+    // forkJoin([requestFreeDict, requestOpenAi]).subscribe(([requestFreeDict, requestOpenAi]) => {
+      
+    //   if (requestFreeDict.includes("meanings")){
+    //     console.log(requestFreeDict);
+    //     this.freeDictionaryDef = JSON.parse(requestFreeDict)["meanings"];
+    //   }
+    //   else {
+    //     console.log(requestOpenAi);
+    //     this.openAiDef = requestOpenAi;
+    //   }
+    // });
   }
   
 }

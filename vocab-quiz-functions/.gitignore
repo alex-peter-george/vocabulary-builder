@@ -137,3 +137,6 @@ __azurite_db*__.json
 # Project exclusions
 arb_dataset.csv
 documents.json
+
+# Knowledge base and documentation
+knowledge_base/

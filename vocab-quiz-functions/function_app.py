@@ -5,13 +5,15 @@ import inspect
 import requests
 import csv
 import random
-import openai
+# import openai
 import os
 from dotenv import load_dotenv
 from nltk.stem import PorterStemmer
 from nltk.tokenize import word_tokenize
 from openai import AzureOpenAI
 from azure.identity import DefaultAzureCredential, get_bearer_token_provider
+import aiohttp
+import asyncio
 
 load_dotenv()  # take environment variables from .env.
 
@@ -20,7 +22,10 @@ VOCABULARY_FILE = 'data/VOCABULARY.csv'
 
 @app.route(route="expression_list")
 def expression_list(req: func.HttpRequest) -> func.HttpResponse:
-    logging.info(f'HTTP trigger function {inspect.currentframe().f_code.co_name} processed a request.')
+    if os.getenv("ENVIRONMENT") == "development":
+        print(f'HTTP trigger function {inspect.currentframe().f_code.co_name} processed a request.')
+    else:
+        logging.info(f'HTTP trigger function {inspect.currentframe().f_code.co_name} processed a request.')
 
     result = []
     with open(VOCABULARY_FILE, 'r') as file:
@@ -40,6 +45,8 @@ def expression_list(req: func.HttpRequest) -> func.HttpResponse:
 
     # Serialize data to JSON
     json_data = json.dumps(result)
+    if os.getenv("ENVIRONMENT") == "development":
+        print(f'Function returns: {json_data}')
     return func.HttpResponse(
         body=json_data,
         mimetype="application/json",
@@ -47,7 +54,10 @@ def expression_list(req: func.HttpRequest) -> func.HttpResponse:
 
 @app.route(route="random_expression")
 def random_expression(req: func.HttpRequest) -> func.HttpResponse:
-    logging.info(f'HTTP trigger function {inspect.currentframe().f_code.co_name} processed a request.')
+    if os.getenv("ENVIRONMENT") == "development":
+        print(f'HTTP trigger function {inspect.currentframe().f_code.co_name} processed a request.')
+    else:
+        logging.info(f'HTTP trigger function {inspect.currentframe().f_code.co_name} processed a request.')
 
     result = []
     rowno = 0
@@ -77,6 +87,8 @@ def random_expression(req: func.HttpRequest) -> func.HttpResponse:
 
     # Serialize data to JSON
     json_data = json.dumps(random_word)
+    if os.getenv("ENVIRONMENT") == "development":
+        print(f'Function returns: {json_data}')
     return func.HttpResponse(
         body=json_data,
         mimetype="application/json",
@@ -84,7 +96,10 @@ def random_expression(req: func.HttpRequest) -> func.HttpResponse:
 
 @app.route(route="expression_dictionary_definition", auth_level=func.AuthLevel.FUNCTION)
 def expression_dictionary_definition(req: func.HttpRequest) -> func.HttpResponse:
-    logging.info(f'HTTP trigger function {inspect.currentframe().f_code.co_name} processed a request.')
+    if os.getenv("ENVIRONMENT") == "development":
+        print(f'HTTP trigger function {inspect.currentframe().f_code.co_name} processed a request.')
+    else:
+        logging.info(f'HTTP trigger function {inspect.currentframe().f_code.co_name} processed a request.')
 
     result = {}
 
@@ -101,24 +116,14 @@ def expression_dictionary_definition(req: func.HttpRequest) -> func.HttpResponse
                 mimetype="application/json",
                 status_code=200)
         
-
-    # Make a GET request to the API
-    response = requests.get(f'{os.getenv("FREE_DICTIONAY_API_BASE_URL")}{expression}',verify=False)
-
-    # Check if the request was successful
-    if response.status_code == 404:
-        return func.HttpResponse(
-        body=json.loads(response.text)['title'],
-        mimetype="application/json",
-        status_code=404)    
-
-
-    if response.status_code == 200:
-        # Parse the response as JSON
-        data = response.json()
-        
+    try:
+        # Make a GET request to the API
+        # response = requests.get(f'{os.getenv("FREE_DICTIONAY_API_BASE_URL")}{expression}',verify=False)
+        response_text = asyncio.run(asyncpostreq(f'{os.getenv("FREE_DICTIONAY_API_BASE_URL")}{expression}'))
+        response_json = json.loads(response_text)
+    
         # Do something with 'data'
-        definitions = data[0]['meanings'][0]['definitions']
+        definitions = response_json[0]['meanings'][0]['definitions']
         meanings = ''
         synonyms = ''
         for definition in definitions:
@@ -127,25 +132,63 @@ def expression_dictionary_definition(req: func.HttpRequest) -> func.HttpResponse
         
         result['meanings'] = meanings
         result['synonyms'] = synonyms
-        status_code = 200
-    else:
-        result['error'] = (response.text)['title']
-        status_code = response.status_code
-
-    # Serialize data to JSON
-    json_data = json.dumps(result)
-    return func.HttpResponse(
-        body=json_data,
-        mimetype="application/json",
-        status_code=status_code)    
+                
+        # Serialize data to JSON
+        json_data = json.dumps(result)
+        if os.getenv("ENVIRONMENT") == "development":
+            print(f'Function {inspect.currentframe().f_code.co_name} returns: {json_data}')
+        return func.HttpResponse(
+            body=json_data,
+            mimetype="application/json",
+            status_code=200) 
+    except Exception as e:
+        result = {"error" : f'{e}'}
+        # Serialize data to JSON
+        json_data = json.dumps(result)
+        if os.getenv("ENVIRONMENT") == "development":
+            print(f'Function {inspect.currentframe().f_code.co_name} returns: {json_data}')
+        return func.HttpResponse(
+            body=json_data,
+            mimetype="application/json",
+            status_code=500)    
 
 
 # get free photo links
 # https://unsplash.com/developers
 
+# async def fetch(session, url):
+#     async with session.get(url) as response:
+#         return await response.text()
+
+# async def main():
+#     async with aiohttp.ClientSession() as session:
+#         html = await fetch(session, 'http://python.org')
+#         print(html)
+
+# # Python 3.7+
+# if __name__ == '__main__':
+#     asyncio.run(main())
+
+async def asyncpostreq(url,headers=None,payloadstr=None,verb = "get"):
+    data = ''
+    if verb == "post":
+        async with aiohttp.ClientSession() as session:
+            async with session.post(url, headers=headers, data=payloadstr) as response:
+                data = await response.read()
+                # print(data.decode('utf8'))
+    elif verb == "get":
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url) as response:
+                data = await response.read()
+    
+    return data.decode('utf8')
+
 @app.route(route="expression_openai_definition", auth_level=func.AuthLevel.FUNCTION)
 def expression_openai_definition(req: func.HttpRequest) -> func.HttpResponse:
-    logging.info(f'HTTP trigger function {inspect.currentframe().f_code.co_name} processed a request.')
+    if os.getenv("ENVIRONMENT") == "development":
+        print(f'HTTP trigger function {inspect.currentframe().f_code.co_name} processed a request.')
+    else:
+        logging.info(f'HTTP trigger function {inspect.currentframe().f_code.co_name} processed a request.')
 
     load_dotenv()
 
@@ -182,22 +225,38 @@ def expression_openai_definition(req: func.HttpRequest) -> func.HttpResponse:
         'Content-Type': 'application/json',  # This is a common header, replace as needed
         # 'Authorization': 'Bearer YOUR_TOKEN'  # Replace 'YOUR_TOKEN' with your token
     }
-    response = requests.post(openai_url, headers=headers, data=payload_str)
 
-    response_json = json.loads(response.text)
-    openai_answer = response_json['choices'][0]['message']['content']
-    
-    # Serialize data to JSON
-    json_data = json.dumps(openai_answer)
-    return func.HttpResponse(
-        body=json_data,
-        mimetype="application/json",
-        status_code=200)
-    
+    try:
+        response_text = asyncio.run(asyncpostreq(openai_url, headers=headers, payloadstr=payload_str,verb="post"))
+        if os.getenv("ENVIRONMENT") == "development":
+            print(f'Function {inspect.currentframe().f_code.co_name} returns: {response_text}')
+
+        response_json = json.loads(response_text)
+        openai_answer = response_json['choices'][0]['message']['content']
+        
+        # Serialize data to JSON
+        json_data = json.dumps(openai_answer)
+        if os.getenv("ENVIRONMENT") == "development":
+            print(f'Function {inspect.currentframe().f_code.co_name} returns: {json_data}')
+        return func.HttpResponse(
+            body=json_data,
+            mimetype="application/json",
+            status_code=200)
+    except Exception as e:
+        err_json = {"error" : f'{e}'}
+        if os.getenv("ENVIRONMENT") == "development":
+            print(f'Function {inspect.currentframe().f_code.co_name} returns: {json.dumps(err_json)}')
+        return func.HttpResponse(
+            body=json.dumps(err_json),
+            mimetype="application/json",
+            status_code=200)
 
 @app.route(route="word_stemming", auth_level=func.AuthLevel.FUNCTION)
 def word_stemming(req: func.HttpRequest) -> func.HttpResponse:
-    logging.info(f'HTTP trigger function {inspect.currentframe().f_code.co_name} processed a request.')
+    if os.getenv("ENVIRONMENT") == "development":
+        print(f'HTTP trigger function {inspect.currentframe().f_code.co_name} processed a request.')
+    else:
+        logging.info(f'HTTP trigger function {inspect.currentframe().f_code.co_name} processed a request.')
 
     expression = req.params.get('expression')
     if not expression:
@@ -225,14 +284,20 @@ def word_stemming(req: func.HttpRequest) -> func.HttpResponse:
     word_stem = {'stem' : ps.stem(expression)}
 
     # Serialize data to JSON
+    json_data = json.dumps(word_stem)
+    if os.getenv("ENVIRONMENT") == "development":
+        print(f'Function returns: {json_data}')
     return func.HttpResponse(
-        body=json.dumps(word_stem),
+        body=json_data,
         mimetype="application/json",
         status_code=200)
 
 @app.route(route="vocabulary_entries_count", auth_level=func.AuthLevel.FUNCTION)
 def vocabulary_entries_count(req: func.HttpRequest) -> func.HttpResponse:
-    logging.info(f'HTTP trigger function {inspect.currentframe().f_code.co_name} processed a request.')
+    if os.getenv("ENVIRONMENT") == "development":
+        print(f'HTTP trigger function {inspect.currentframe().f_code.co_name} processed a request.')
+    else:
+        logging.info(f'HTTP trigger function {inspect.currentframe().f_code.co_name} processed a request.')
     
     with open('data/VOCABULARY.csv', 'r') as file:
         
@@ -261,7 +326,10 @@ def vocabulary_entries_count(req: func.HttpRequest) -> func.HttpResponse:
 
 @app.route(route="calculate_similarity", auth_level=func.AuthLevel.FUNCTION)
 def calculate_similarity(req: func.HttpRequest) -> func.HttpResponse:
-    logging.info(f'HTTP trigger function {inspect.currentframe().f_code.co_name} processed a request.')
+    if os.getenv("ENVIRONMENT") == "development":
+        print(f'HTTP trigger function {inspect.currentframe().f_code.co_name} processed a request.')
+    else:
+        logging.info(f'HTTP trigger function {inspect.currentframe().f_code.co_name} processed a request.')
 
     try:
         req_body = req.get_json()
@@ -291,6 +359,8 @@ def calculate_similarity(req: func.HttpRequest) -> func.HttpResponse:
 
     # Serialize data to JSON
     json_data = json.dumps(scores)
+    if os.getenv("ENVIRONMENT") == "development":
+        print(f'Function returns: {json_data}')
     return func.HttpResponse(
         body=json_data,
         mimetype="application/json",

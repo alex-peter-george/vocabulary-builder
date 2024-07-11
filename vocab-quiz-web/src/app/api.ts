@@ -29,46 +29,47 @@ export class DataService {
     return await r.json();
   }
   
-  async postDictionaryDef(word: string, url: string) : Promise<string> {
-    this.http.post(url, {"expression" : word}).subscribe(
-      response => {
-        console.log('Data sent successfully:', response);
-        this.postResponse = JSON.stringify(response);
-      },
-      error => {
-        console.error('Error sending data:', error);
-        this.postResponse = "error";
-      }
-    );
-    return this.postResponse;
+  postDictionaryDef(word: string, url: string) : Promise<any> {
+    // return new Promise((response,error) => 
+    //   this.http.post(url, {"expression" : word}).subscribe(
+    //     response => {
+    //       console.log('[OK][Data Service] Data received:', response);
+    //       return JSON.stringify(response);
+    //     },
+    //     error => {
+    //       console.error('[Bad][Data Service] Error received:', error);
+    //       return '{"error" : "' + error + '"}';
+    //     }
+    //   ));
+    return this.http.post(url, {"expression" : word}).toPromise();
   }
 
-  async postOpenAiDef(word: string, url: string) : Promise<string> {
-    this.http.post(url, {"expression" : word}).subscribe(
-      response => {
-        console.log('Data sent successfully:', response);
-        this.postResponse = JSON.stringify(response);
-      },
-      error => {
-        console.error('Error sending data:', error);
-        this.postResponse = "error";
-      }
-    );
-    return this.postResponse;
+  postOpenAiDef(word: string, url: string) : Promise<any> {
+    // return new Promise((response,error) => 
+    //   this.http.post(url, {"expression" : word}).subscribe(
+    //     response => {
+    //       console.log('[OK][Data Service] Data received:', response);
+    //       return JSON.stringify(response);
+    //     },
+    //     error => {
+    //       console.error('[Bad][Data Service] Error received:', error);
+    //       return '{"error" : "' + error + '"}';
+    //     }
+    //   ));
+    return this.http.post(url, {"expression" : word}).toPromise();
   }
 
-  async postResultGetScores(word: string, user_answer: string) : Promise<string> {
+  postResultGetScores(word: string, user_answer: string) {
     this.http.post(this.simScoresUrl, {"expression" : word, "user_answer" : user_answer}).subscribe(
       response => {
         console.log('Data sent successfully:', response);
-        this.postResponse = JSON.stringify(response);
+        return JSON.stringify(response);
       },
       error => {
         console.error('Error sending data:', error);
-        this.postResponse = "error";
+        return "error";
       }
     );
-    return this.postResponse;
   }
 
   serializeError(error: HttpErrorResponse): string {
