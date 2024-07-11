@@ -126,7 +126,7 @@ export class AppComponent implements OnInit {
 
     var query_str = this.searchControl.value;
     this.callerror = '';
-    this.showSearchResults = false;
+    this.showSearchResults = true;
     this.showWordDefs = true;
     this.freeDictionaryDef = '<Wait for data to load...>';
     this.openAiDef = '<Wait for data to load...>';

@@ -65,11 +65,11 @@
               <td>&nbsp;</td>
             </tr>
             <tr>
-              <td><b>Enter your answer:</b></td>
+              <td><b>Enter your definition:</b></td>
             </tr>
             <tr>
               <td>
-                <textarea rows = "7" cols = "100" name = "description" title="quiz_answer"></textarea>
+                <textarea rows = "5" cols = "100" name = "description" title="quiz_answer"></textarea>
               </td>
             </tr>
             <tr>
@@ -79,24 +79,28 @@
             </tr>
             <tr><td>&nbsp;</td></tr>
             <tr *ngIf="showWordDefs">
-              <td><b>Free Dictionary answer:</b></td>
+              <td><b>Free Dictionary definition:</b></td>
             </tr>
             <tr *ngIf="showWordDefs">
               <td>
-                <textarea rows = "7" cols = "100" name = "description" title="dict_answer" readonly style="text-align: left;">{{freeDictionaryDef}}</textarea>
+                <textarea rows = "5" cols = "100" name = "description" title="dict_answer" readonly style="text-align: left;">{{freeDictionaryDef}}</textarea>
               </td>
             </tr>
             <tr *ngIf="showWordDefs">
-              <td><b>Open AI answer:</b></td>
+              <td><b>Open AI definition:</b></td>
             </tr>
             <tr *ngIf="showWordDefs">
               <td>
-                <textarea rows = "7" cols = "100" name = "description" title="openai_answer" readonly>{{openAiDef}}</textarea>
+                <textarea rows = "12" cols = "100" name = "description" title="openai_answer" readonly>{{openAiDef}}</textarea>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <textarea rows = "2" cols = "100" name = "description" title="openai_answer" readonly style="color:red;text-align: left;border-width: 0;">{{callerror}}</textarea>
               </td>
             </tr>
           </table>
         </div>
-        <p><span style="color:red">{{ callerror }}</span></p>
       </td>
     </tr>
   </table>
