@@ -214,7 +214,7 @@ def expression_openai_definition(req: func.HttpRequest) -> func.HttpResponse:
     if ' ' in expression:
         prompt = f'Define the expression \'{expression}\' and list a few examples that use it.'
     else:
-        prompt = f'Define the word \'{expression}\' and list a few examples that use it; attach a few links to a set of relevant photos as well.'
+        prompt = f'Define the word \'{expression}\' and list a few examples that use it.'
        
     payload_str = '{"messages": [{"role": "user","content":"'
     payload_str += prompt

@@ -7,6 +7,7 @@ import { plainToClass } from 'class-transformer';
 import { Observable } from 'rxjs';
 import { startWith, debounceTime, switchMap } from 'rxjs/operators';
 import { forkJoin } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
 
 
 class Expression {
@@ -46,16 +47,25 @@ export class AppComponent implements OnInit {
   public freeDictionaryDef: string = '';
   public openAiDef: string = '';
   public quizStartTime: Date;
+  public photoUrl = '';
   
-  constructor(private dataService: DataService) {
+  constructor(private dataService: DataService, private http: HttpClient) {
     this.selectedExpression = new Expression();
     this.quizStartTime = new Date();
   }
 
   ngOnInit() {
     this.callerror = '';
-
+  
   }
+
+  renderPhoto(){
+    let count = 1;
+    let url = `https://api.unsplash.com/photos/random?query=${this.selectedExpression.stem}&count=${count}&client_id=${environment.UNSPLASH_ACCESS_KEY}`;
+    this.http.get(url).subscribe((response: any) => {
+      this.photoUrl = response[0].urls.small;
+    });
+  } 
 
   async selectWordRandomly() {
     console.log(`Running environment is set to ${environment.ENVIRONMENT}`)
@@ -171,7 +181,11 @@ export class AppComponent implements OnInit {
     //     this.openAiDef = requestOpenAi;
     //   }
     // });
+    
+    this.renderPhoto();
+    
   }
+  
   
 }
 
