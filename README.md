@@ -2,6 +2,14 @@
 
 ## Concept Design
 
+This application implements a "vocabulary quiz" where:
+* A word or expression is selected randomly from a vocabulary builder, which is an aggregate of files collected from Kindle Vocabulry, own user notes etc.
+* User is prompted to enter a definition for the selected word or expression
+* Application is getting similar definitions from Free-Dictionary API or Azure OpenAI Large Language Model (LLM); OpenAI also comes up with a set of usage examples for the respective selection 
+* Appliocation gets a photo from a global repository (Unsplash API) related to the selected word (no photo is selectd for an expression)
+* Application calls then a simiularity algorithm based on the definitions vectorization (a.k.a. embedding) hosted by Azure OpenAI; the algorithm grants "similarity scores" between user answer and the two definitions
+* Application aggregates the scores into an anerage, for the same session
+
 ![vocab-quiz-diagram-1](https://github.com/user-attachments/assets/8053c34c-6902-4ab0-b52c-0ec57917786a)
 
 ## Single Page Application with Angular
