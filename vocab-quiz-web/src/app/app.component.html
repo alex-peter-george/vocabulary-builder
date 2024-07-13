@@ -30,8 +30,8 @@
             </tr>
             <tr>
               <td colspan="3" style="text-align: right;"><b>Average Scores:</b></td>
-              <td style="text-align: left;"><b>0.23</b></td>
-              <td style="text-align: left;"><b>0.26</b></td>
+              <td style="text-align: left;"><b>{{ averageDicScore.toFixed(2) }}</b></td>
+              <td style="text-align: left;"><b>{{ averageOpenAiScore.toFixed(2) }}</b></td>
               <td></td>
             </tr>
           </tbody>
@@ -40,6 +40,8 @@
       <td>&nbsp;</td>
       <td style="width:70%;text-align: left;vertical-align: top;">
         <button mat-raised-button color="primary" style="background-color:lightgrey;height:30px" (click)="selectWordRandomly()"><b>Select expression randomly</b></button>
+        &nbsp;
+        <button mat-raised-button color="primary" style="background-color:lightgrey;height:30px"><b>Exeport session results</b></button>
         &nbsp;
         <button mat-raised-button color="primary" style="background-color:lightgreen;height:30px" (click)="startNewQuiz()"><b>Start new quiz</b></button><br/><br/>
         <span style="width:100px">&nbsp;&nbsp;&nbsp;&nbsp;</span>*** Quiz started on <b>{{ quizStartTime }}</b>,running on environment:<b>{{ currentEnv }}</b>
@@ -58,12 +60,12 @@
             </tr>
             <tr>
               <td>
-                <textarea rows = "5" cols = "100" name = "description" title="quiz_answer"></textarea>
+                <textarea rows = "5" cols = "100" name = "description" title="quiz_answer" #userAnswer>{{ userDefinition }}</textarea>
               </td>
             </tr>
             <tr>
               <td>
-                <button mat-raised-button color="primary" style="background-color:lightgrey;height:30px" (click)="submitUserAnswer()"><b>Submit answer</b></button>
+                <button mat-raised-button color="primary" style="background-color:lightgrey;height:30px" (click)="submitUserAnswer(userAnswer.value)"><b>Submit answer</b></button>
               </td>
             </tr>
             <tr><td>&nbsp;</td></tr>

@@ -59,17 +59,18 @@ export class DataService {
     return this.http.post(url, {"expression" : word}).toPromise();
   }
 
-  postResultGetScores(word: string, user_answer: string) {
-    this.http.post(this.simScoresUrl, {"expression" : word, "user_answer" : user_answer}).subscribe(
-      response => {
-        console.log('Data sent successfully:', response);
-        return JSON.stringify(response);
-      },
-      error => {
-        console.error('Error sending data:', error);
-        return "error";
-      }
-    );
+  postResultGetScores(user_answer: string, dict_definition: string, openai_definition: string) : Promise<any> {
+    // this.http.post(this.simScoresUrl, {"user_definition" : user_answer, "dictionary_definition" : dict_definition, "openai_definition" : openai_definition}).subscribe(
+    //   response => {
+    //     console.log('Data sent successfully:', response);
+    //     return JSON.stringify(response);
+    //   },
+    //   error => {
+    //     console.error('Error sending data:', error);
+    //     return "error";
+    //   }
+    // );
+    return this.http.post(this.simScoresUrl, {"user_definition" : user_answer, "dictionary_definition" : dict_definition, "openai_definition" : openai_definition}).toPromise();
   }
 
   serializeError(error: HttpErrorResponse): string {

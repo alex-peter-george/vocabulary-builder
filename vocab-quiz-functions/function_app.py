@@ -14,11 +14,84 @@ from openai import AzureOpenAI
 from azure.identity import DefaultAzureCredential, get_bearer_token_provider
 import aiohttp
 import asyncio
+import re
+import numpy as np
 
 load_dotenv()  # take environment variables from .env.
 
 app = func.FunctionApp(http_auth_level=func.AuthLevel.FUNCTION)
 VOCABULARY_FILE = 'data/VOCABULARY.csv'
+
+client = AzureOpenAI(
+  api_key = os.getenv('AZURE_OPENAI_API_KEY_2'),  
+  api_version = os.getenv('AZURE_OPENAI_API_VERSION_2'),
+  azure_endpoint = os.getenv('AZURE_OPENAI_ENDPOINT_2') 
+)
+
+# s is input text
+def normalize_text(s, sep_token = " \n "):
+    s = re.sub(r'\s+',  ' ', s).strip()
+    s = re.sub(r". ,","",s)
+    # remove all instances of multiple spaces
+    s = s.replace("..",".")
+    s = s.replace(". .",".")
+    s = s.replace("\n", "")
+    s = s.strip()
+    
+    return s
+
+def cosine_similarity_np(a, b):
+    return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
+
+def generate_embeddings(text, model="text-embedding-ada-deployment"): # model = "deployment_name"
+    return client.embeddings.create(input = [text], model=model).data[0].embedding
+
+def get_similarity_score(user_query,target_text):
+    e_user_query = generate_embeddings(
+        user_query,
+        model="text-embedding-ada-deployment" # model should be set to the deployment name you chose when you deployed the text-embedding-ada-002 (Version 2) model
+    )
+
+    e_target_text = generate_embeddings(
+        target_text,
+        model="text-embedding-ada-deployment" # model should be set to the deployment name you chose when you deployed the text-embedding-ada-002 (Version 2) model
+    )
+    
+    similarity_score = cosine_similarity_np(e_target_text, e_user_query)
+
+    return similarity_score
+
+# get free photo links
+# https://unsplash.com/developers
+
+# async def fetch(session, url):
+#     async with session.get(url) as response:
+#         return await response.text()
+
+# async def main():
+#     async with aiohttp.ClientSession() as session:
+#         html = await fetch(session, 'http://python.org')
+#         print(html)
+
+# # Python 3.7+
+# if __name__ == '__main__':
+#     asyncio.run(main())
+
+async def asyncpostreq(url,headers=None,payloadstr=None,verb = "get"):
+    data = ''
+    if verb == "post":
+        async with aiohttp.ClientSession() as session:
+            async with session.post(url, headers=headers, data=payloadstr) as response:
+                data = await response.read()
+                # print(data.decode('utf8'))
+    elif verb == "get":
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url) as response:
+                data = await response.read()
+    
+    return data.decode('utf8')
+
+##### Azure functions definitions ###################################################################
 
 @app.route(route="expression_list")
 def expression_list(req: func.HttpRequest) -> func.HttpResponse:
@@ -151,37 +224,6 @@ def expression_dictionary_definition(req: func.HttpRequest) -> func.HttpResponse
             body=json_data,
             mimetype="application/json",
             status_code=500)    
-
-
-# get free photo links
-# https://unsplash.com/developers
-
-# async def fetch(session, url):
-#     async with session.get(url) as response:
-#         return await response.text()
-
-# async def main():
-#     async with aiohttp.ClientSession() as session:
-#         html = await fetch(session, 'http://python.org')
-#         print(html)
-
-# # Python 3.7+
-# if __name__ == '__main__':
-#     asyncio.run(main())
-
-async def asyncpostreq(url,headers=None,payloadstr=None,verb = "get"):
-    data = ''
-    if verb == "post":
-        async with aiohttp.ClientSession() as session:
-            async with session.post(url, headers=headers, data=payloadstr) as response:
-                data = await response.read()
-                # print(data.decode('utf8'))
-    elif verb == "get":
-        async with aiohttp.ClientSession() as session:
-            async with session.get(url) as response:
-                data = await response.read()
-    
-    return data.decode('utf8')
 
 @app.route(route="expression_openai_definition", auth_level=func.AuthLevel.FUNCTION)
 def expression_openai_definition(req: func.HttpRequest) -> func.HttpResponse:
@@ -333,8 +375,9 @@ def calculate_similarity(req: func.HttpRequest) -> func.HttpResponse:
 
     try:
         req_body = req.get_json()
-        expression = req_body.get('expression')
-        userAnswer = req_body.get('user_answer')
+        userDefinition = req_body.get('user_definition')
+        dictDefinition = req_body.get('dictionary_definition')
+        openaiDefinition = req_body.get('openai_definition')
     except ValueError:
         req_error = {"error" : 'Request failed due to missing parameters [expression OR user_answer]'}
         # Serialize data to JSON
@@ -343,19 +386,19 @@ def calculate_similarity(req: func.HttpRequest) -> func.HttpResponse:
             mimetype="application/json",
             status_code=200)
 
-    # get dictionary answer
-    dicAnswer = ''
-
-    # get openAi answer
-    openaiAnswer = ''
+    if userDefinition == '':
+        return func.HttpResponse(
+        body='Missing user definition.',
+        mimetype="application/json",
+        status_code=500)
 
     # calculate dictionary similarity score
-    dicSimilarity = 0.45
+    dictSimilarity = get_similarity_score(userDefinition,dictDefinition)
 
     # calculate OpenAI similarity score
-    openAiSimilarity = 0.53
+    openAiSimilarity = get_similarity_score(userDefinition,openaiDefinition)
     
-    scores = {"dicSimilarity": dicSimilarity, "openAiSimilarity" : openAiSimilarity}
+    scores = {"dicSimilarity": round(dictSimilarity,2), "openAiSimilarity" : round(openAiSimilarity,2)}
 
     # Serialize data to JSON
     json_data = json.dumps(scores)

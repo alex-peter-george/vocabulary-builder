@@ -48,6 +48,13 @@ export class AppComponent implements OnInit {
   public openAiDef: string = '';
   public quizStartTime: Date;
   public photoUrl = '';
+  public userDefinition = '';
+
+  public averageDicScore: number = 0.0;
+  public averageOpenAiScore: number = 0.0;
+  public sumDicScore: number = 0;
+  public sumOpenAiScore: number = 0;
+  runsCount: number = 0;
   
   constructor(private dataService: DataService, private http: HttpClient) {
     this.selectedExpression = new Expression();
@@ -56,6 +63,7 @@ export class AppComponent implements OnInit {
 
   ngOnInit() {
     this.callerror = '';
+    this.userDefinition = '';
   
   }
 
@@ -73,6 +81,7 @@ export class AppComponent implements OnInit {
     this.callerror = '';
     this.showSearchResults = false;
     this.showWordDefs = false;
+    this.userDefinition = '';
     
     this.dataService.fetchRandomWord().then(
       (data) => {
@@ -82,8 +91,8 @@ export class AppComponent implements OnInit {
           this.showSearchResults = true;
           this.selectedExpression.word = jsonObj['word'];
           this.selectedExpression.stem = jsonObj['stem'];
-          
-          this.expressions.push({word: jsonObj['word'],stem: jsonObj['stem'],dicscore:0.10,openaiscore:0.10, dictionaryDef:'', openAiDef: '', userDef:''});
+          this.userDefinition = '';
+          //this.expressions.push({word: jsonObj['word'],stem: jsonObj['stem'],dicscore:0.10,openaiscore:0.10, dictionaryDef:'', openAiDef: '', userDef:''});
         }
         catch{
           this.showSearchResults = false;
@@ -107,31 +116,41 @@ export class AppComponent implements OnInit {
     this.showSearchResults = false;
     this.showWordDefs = false;
     this.quizStartTime = new Date();
+
+    this.averageDicScore = 0.0;
+    this.averageOpenAiScore = 0;
+
+    this.sumDicScore = 0;
+    this.sumOpenAiScore = 0;
+    this.runsCount = 0;
+
+    this.expressions = [];
+    this.quizStartTime = new Date();
     
-    this.dataService.fetchRandomWord().then(
-      (data) => {
-        const jsonStr = JSON.stringify(data);
-        try{
-          const jsonObj = JSON.parse(jsonStr);
-          this.showSearchResults = true;
-          this.selectedExpression.word = jsonObj['word'];
-          this.selectedExpression.stem = jsonObj['stem'];
-        }
-        catch{
-          this.showSearchResults = false;
-        }
-      },
-      (error) => {
-        if (error instanceof HttpErrorResponse)
-          this.callerror = this.dataService.serializeError(error);
-        else
-          this.callerror = error.message;
-      }
-    );
+    // this.dataService.fetchRandomWord().then(
+    //   (data) => {
+    //     const jsonStr = JSON.stringify(data);
+    //     try{
+    //       const jsonObj = JSON.parse(jsonStr);
+    //       this.showSearchResults = true;
+    //       this.selectedExpression.word = jsonObj['word'];
+    //       this.selectedExpression.stem = jsonObj['stem'];
+    //     }
+    //     catch{
+    //       this.showSearchResults = false;
+    //     }
+    //   },
+    //   (error) => {
+    //     if (error instanceof HttpErrorResponse)
+    //       this.callerror = this.dataService.serializeError(error);
+    //     else
+    //       this.callerror = error.message;
+    //   }
+    // );
   
   }
 
-  submitUserAnswer() {
+  submitUserAnswer(userAnswer:string) {
     console.log(`Running environment is set to ${environment.ENVIRONMENT}`)
 
     var query_str = this.searchControl.value;
@@ -157,6 +176,7 @@ export class AppComponent implements OnInit {
         response => {
           console.log('[OK][Angular client] Data received:', response);
           this.openAiDef = response;
+          this.calculateSimilarityScores(userAnswer);
         },
         error => {
           console.log('[Bad][Angular client] Error received:', error);
@@ -183,9 +203,37 @@ export class AppComponent implements OnInit {
     // });
     
     this.renderPhoto();
-    
   }
   
+  calculateSimilarityScores(userAnswer: string){
+    // Calculate the similarity scores
+    let dictScore = 0;
+    let openaiScore = 0;  
+    this.dataService.postResultGetScores(userAnswer, this.freeDictionaryDef, this.openAiDef).then(
+      response => {
+        console.log('[OK][Angular client] Data received:', response);
+        //this.openAiDef = response;
+        dictScore = response['dicSimilarity'];
+        openaiScore = response['openAiSimilarity'];
+        // Update the list of expressions tab;e  
+        this.expressions.push({word: this.selectedExpression.word,stem: this.selectedExpression.stem,dicscore:dictScore,openaiscore:openaiScore, dictionaryDef:'', openAiDef: '', userDef:''});
+        // calculate average scores
+        this.runsCount = this.runsCount + 1;
+        this.sumDicScore = this.sumDicScore + dictScore;
+        this.sumOpenAiScore = this.sumOpenAiScore + openaiScore;
+        this.averageDicScore = this.sumDicScore / this.runsCount;
+        this.averageOpenAiScore = this.sumOpenAiScore / this.runsCount;
+
+      },
+      error => {
+        console.log('[Bad][Angular client] Error received:', error);
+        if (error instanceof HttpErrorResponse)
+          this.callerror = this.dataService.serializeError(error);
+        else
+          this.callerror = error.message;
+      }
+    );  
+  }
   
 }
 
