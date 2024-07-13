@@ -2,6 +2,8 @@
 
 ## Concept Design
 
+![vocab-quiz-diagram-1](https://github.com/user-attachments/assets/8053c34c-6902-4ab0-b52c-0ec57917786a)
+
 ## Single Page Application with Angular
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 16.1.8.
