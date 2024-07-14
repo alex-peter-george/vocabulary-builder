@@ -23,10 +23,12 @@ app = func.FunctionApp(http_auth_level=func.AuthLevel.FUNCTION)
 VOCABULARY_FILE = 'data/VOCABULARY.csv'
 
 client = AzureOpenAI(
-  api_key = os.getenv('AZURE_OPENAI_API_KEY_2'),  
-  api_version = os.getenv('AZURE_OPENAI_API_VERSION_2'),
-  azure_endpoint = os.getenv('AZURE_OPENAI_ENDPOINT_2') 
+  api_key = os.getenv('AZURE_OPENAI_EMBED_API_KEY'),  
+  api_version = os.getenv('AZURE_OPENAI_EMBED_API_VERSION'),
+  azure_endpoint = os.getenv('AZURE_OPENAI_EMBED_ENDPOINT')
 )
+
+embed_model_deployment_name = os.getenv('EMBED_MODEL_DEPLOYMENT_NAME')
 
 # s is input text
 def normalize_text(s, sep_token = " \n "):
@@ -43,18 +45,18 @@ def normalize_text(s, sep_token = " \n "):
 def cosine_similarity_np(a, b):
     return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
 
-def generate_embeddings(text, model="text-embedding-ada-deployment"): # model = "deployment_name"
+def generate_embeddings(text, model): 
     return client.embeddings.create(input = [text], model=model).data[0].embedding
 
 def get_similarity_score(user_query,target_text):
     e_user_query = generate_embeddings(
         user_query,
-        model="text-embedding-ada-deployment" # model should be set to the deployment name you chose when you deployed the text-embedding-ada-002 (Version 2) model
+        model=os.getenv('EMBED_MODEL_DEPLOYMENT_NAME')
     )
 
     e_target_text = generate_embeddings(
         target_text,
-        model="text-embedding-ada-deployment" # model should be set to the deployment name you chose when you deployed the text-embedding-ada-002 (Version 2) model
+        model=os.getenv('EMBED_MODEL_DEPLOYMENT_NAME')
     )
     
     similarity_score = cosine_similarity_np(e_target_text, e_user_query)
@@ -247,10 +249,10 @@ def expression_openai_definition(req: func.HttpRequest) -> func.HttpResponse:
                 mimetype="application/json",
                 status_code=200)
     
-    openai_endpoint = os.getenv('AZURE_OPENAI_ENDPOINT') 
-    deployment_name = os.getenv('DEPLOYMENT_NAME')
-    openai_key = os.getenv('AZURE_OPENAI_API_KEY')
-    openai_version = os.getenv('AZURE_OPENAI_API_VERSION')
+    openai_endpoint = os.getenv('AZURE_OPENAI_RAG_ENDPOINT') 
+    deployment_name = os.getenv('RAG_MODEL_DEPLOYMENT_NAME')
+    openai_key = os.getenv('AZURE_OPENAI_RAG_API_KEY')
+    openai_version = os.getenv('AZURE_OPENAI_RAG_API_VERSION')
     openai_url = f'{openai_endpoint}openai/deployments/{deployment_name}/chat/completions?api-version={openai_version}&api-key={openai_key}'
 
     if ' ' in expression:

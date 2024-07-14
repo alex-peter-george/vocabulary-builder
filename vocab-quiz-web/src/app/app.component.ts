@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { DataService } from './api';
-import { FormControl } from '@angular/forms';
+import { FormControl, FormsModule } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 import { environment } from 'src/environment';
 import { plainToClass } from 'class-transformer';
@@ -48,8 +48,8 @@ export class AppComponent implements OnInit {
   public openAiDef: string = '';
   public quizStartTime: Date;
   public photoUrl = '';
-  public userDefinition = '';
-
+  public userDefinition: string = '';
+  
   public averageDicScore: number = 0.0;
   public averageOpenAiScore: number = 0.0;
   public sumDicScore: number = 0;
@@ -63,8 +63,6 @@ export class AppComponent implements OnInit {
 
   ngOnInit() {
     this.callerror = '';
-    this.userDefinition = '';
-  
   }
 
   renderPhoto(){
@@ -91,7 +89,6 @@ export class AppComponent implements OnInit {
           this.showSearchResults = true;
           this.selectedExpression.word = jsonObj['word'];
           this.selectedExpression.stem = jsonObj['stem'];
-          this.userDefinition = '';
           //this.expressions.push({word: jsonObj['word'],stem: jsonObj['stem'],dicscore:0.10,openaiscore:0.10, dictionaryDef:'', openAiDef: '', userDef:''});
         }
         catch{

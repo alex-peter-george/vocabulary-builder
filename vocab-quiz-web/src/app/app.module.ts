@@ -6,7 +6,7 @@ import { AppComponent } from './app.component';
 import { AgGridModule } from "ag-grid-angular";
 
 import { HttpClientModule } from '@angular/common/http';
-import { ReactiveFormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 
 @NgModule({
@@ -20,6 +20,7 @@ import { MatButtonModule } from '@angular/material/button';
     HttpClientModule,
     ReactiveFormsModule,
     MatButtonModule,
+    FormsModule
   ],
   providers: [],
   bootstrap: [AppComponent]

@@ -56,11 +56,11 @@
         <div style="text-align: left; vertical-align: top;">
           <table>
             <tr>
-              <td><b>Enter your definition:</b></td>
+              <td><b>Enter your definition:</b>{{userDefinition}}</td>
             </tr>
             <tr>
               <td>
-                <textarea rows = "5" cols = "100" name = "description" title="quiz_answer" #userAnswer>{{ userDefinition }}</textarea>
+                <textarea rows = "5" cols = "100" name = "description" title="quiz_answer" #userAnswer [(ngModel)] = "userDefinition"></textarea>
               </td>
             </tr>
             <tr>
