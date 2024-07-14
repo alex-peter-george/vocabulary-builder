@@ -97,9 +97,9 @@ export class AppComponent implements OnInit {
       },
       (error) => {
         if (error instanceof HttpErrorResponse)
-          this.callerror = this.dataService.serializeError(error);
+          this.callerror = `Failed selectWordRandomly():${this.dataService.serializeError(error)}`;
         else
-          this.callerror = error.message;
+          this.callerror = `Failed selectWordRandomly():${error.message}`;
       }
     );
     
@@ -159,13 +159,15 @@ export class AppComponent implements OnInit {
     
     this.dataService.postDictionaryDef(this.selectedExpression.word, environment.DICTIONARYDEFURL).then(
         response => {
+          console.log('[OK][Angular client] Data received:', response);
           this.freeDictionaryDef = response["meanings"];
         },
         error => {
+          console.log('[Bad][Angular client] Error received:', error);
           if (error instanceof HttpErrorResponse)
-            this.callerror = this.dataService.serializeError(error);
+            this.callerror = `Failed submitUserAnswer.dataService.postDictionaryDef(...):${this.dataService.serializeError(error)}`;
           else
-            this.callerror = error.message;
+            this.callerror = `Failed submitUserAnswer.dataService.postDictionaryDef(...):${error.message}`;
         }
       );
     
@@ -178,9 +180,9 @@ export class AppComponent implements OnInit {
         error => {
           console.log('[Bad][Angular client] Error received:', error);
           if (error instanceof HttpErrorResponse)
-            this.callerror = this.dataService.serializeError(error);
+            this.callerror = `Failed submitUserAnswer.dataService.postOpenAiDef(...):${this.dataService.serializeError(error)}`;
           else
-            this.callerror = error.message;
+            this.callerror = `Failed submitUserAnswer.dataService.postOpenAiDef(...):${error.message}`;
         }
       );
     
@@ -225,9 +227,9 @@ export class AppComponent implements OnInit {
       error => {
         console.log('[Bad][Angular client] Error received:', error);
         if (error instanceof HttpErrorResponse)
-          this.callerror = this.dataService.serializeError(error);
+          this.callerror = `Failed calculateSimilarityScores(...):${this.dataService.serializeError(error)}`;
         else
-          this.callerror = error.message;
+          this.callerror = `Failed calculateSimilarityScores(...):${error.message}`;
       }
     );  
   }
