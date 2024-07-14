@@ -95,7 +95,7 @@ async def asyncpostreq(url,headers=None,payloadstr=None,verb = "get"):
 
 ##### Azure functions definitions ###################################################################
 
-@app.route(route="expression_list")
+@app.route(route="expression_list", auth_level=func.AuthLevel.FUNCTION)
 def expression_list(req: func.HttpRequest) -> func.HttpResponse:
     if os.getenv("ENVIRONMENT") == "development":
         print(f'HTTP trigger function {inspect.currentframe().f_code.co_name} processed a request.')
@@ -127,7 +127,7 @@ def expression_list(req: func.HttpRequest) -> func.HttpResponse:
         mimetype="application/json",
         status_code=200)
 
-@app.route(route="random_expression")
+@app.route(route="random_expression", auth_level=func.AuthLevel.FUNCTION)
 def random_expression(req: func.HttpRequest) -> func.HttpResponse:
     if os.getenv("ENVIRONMENT") == "development":
         print(f'HTTP trigger function {inspect.currentframe().f_code.co_name} processed a request.')
