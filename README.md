@@ -55,3 +55,14 @@ Based on the presentation at [Coding Shorts: Deploy to Static Web Apps without G
 * Go to *Azure Portal* and get the managed deployment token from the static web app created there
 * Go back to terminal windows and run `swa deploy --deployment-token <managed-token-string>`; swa is deployed in **preview** environment in Azure* 
 
+## Deploy the Azure Function App from Visual Studio
+
+Follow the set of simple steps listed below:
+
+* Log in to Azure POrtal and create a Function App under the subscription you have
+* In the project azure-vocabulary-quiz\vocab-quiz-functions, select "Azure" from the left-side menu
+* Expand "Workspace" and hover the mouse on "Local Project" entry; click on "Deploy on Azure..." icon
+* Select the subscription in the upper dropdown box listed under "Select Function App (1/2)"
+* Select the Function App you already created with Azure POrtal by selected it under "Select Function App (2/2)"
+* Reply "Yes" to the pop up window that confirms the deployment; under "Azure" tab below, wait up for the deployment to complete
+* Deployment on Azure is complete when "Deploy to App *vocabulary-builder* Succeeded" message shows up
