@@ -46,6 +46,7 @@ Based on the presentation at [Coding Shorts: Deploy to Static Web Apps without G
 ##### Steps
 
 * Create a Static Web App in Azure Portal, with the settings you need
+* Make sure you update the file *environment.ts* with the proper settings (pointing to Azure Function App endpoints)
 * Open cmd terminal in Angular web folder 
 * Install *swa cli tool* with `npm i @azure/static-web-apps-cli -g`
 * Run `swa login` to login to Azure, to the proper subscription and tenant; the settings are saved in the newly created .env file
