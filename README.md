@@ -60,6 +60,7 @@ Based on the presentation at [Coding Shorts: Deploy to Static Web Apps without G
 Follow the set of simple steps listed below:
 
 * Log in to Azure POrtal and create a Function App under the subscription you have
+* In the project azure-vocabulary-quiz\vocab-quiz-functions, update .env settings with the proper values
 * In the project azure-vocabulary-quiz\vocab-quiz-functions, select "Azure" from the left-side menu
 * Expand "Workspace" and hover the mouse on "Local Project" entry; click on "Deploy on Azure..." icon
 * Select the subscription in the upper dropdown box listed under "Select Function App (1/2)"
