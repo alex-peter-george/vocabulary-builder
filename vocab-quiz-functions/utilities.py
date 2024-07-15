@@ -49,9 +49,32 @@ def build_word_vocabulary():
     print(f"CSV file ''data/VOCABULARY.csv'' created successfully.")
     return
 
+def validate_file_content():
+    try:
+        with open('data/VOCABULARY.csv', 'r') as file:
+            # Create a CSV reader
+            reader = csv.reader(file)
+            rowno = 2
+            # Loop over each row in the file
+            skipfirst = True
+            for row in reader:
+                if skipfirst:
+                    skipfirst = False
+                    continue
+                item = {}
+                item['word'] = row[0]
+                item['stem'] = row[1]
+                rowno += 1
+        return 'File is ok.'
+    except Exception as e:
+        return f'Error at row_no {rowno}:{e}'
+
 if __name__ == "__main__":
+    COMMAND = 'VALIDATEFILE'
     if (COMMAND == 'PREPDATA'):
         build_word_vocabulary()
+    elif (COMMAND == 'VALIDATEFILE'):
+        validate_file_content()
 
     
 

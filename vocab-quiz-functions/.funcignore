@@ -8,3 +8,4 @@ test
 .venv
 utilities.py
 data/source_files/*
+knowledge_base/
