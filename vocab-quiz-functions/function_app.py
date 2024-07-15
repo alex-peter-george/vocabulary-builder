@@ -409,4 +409,35 @@ def calculate_similarity(req: func.HttpRequest) -> func.HttpResponse:
         mimetype="application/json",
         status_code=200)
 
+@app.route(route="validate_file_content", auth_level=func.AuthLevel.FUNCTION)
+def validate_file_content(req: func.HttpRequest) -> func.HttpResponse:
+    if os.getenv("ENVIRONMENT") == "development":
+        print(f'HTTP trigger function {inspect.currentframe().f_code.co_name} processed a request.')
+    else:
+        logging.info(f'HTTP trigger function {inspect.currentframe().f_code.co_name} processed a request.')
 
+    VOCABULARY_FILE = 'data/VOCABULARY.csv'
+    try:
+        with open(f'{VOCABULARY_FILE}', 'r') as file:
+            # Create a CSV reader
+            reader = csv.reader(file)
+            rowno = 2
+            # Loop over each row in the file
+            skipfirst = True
+            for row in reader:
+                if skipfirst:
+                    skipfirst = False
+                    continue
+                item = {}
+                item['word'] = row[0]
+                item['stem'] = row[1]
+                rowno += 1
+        return func.HttpResponse(
+             f'Content of file {VOCABULARY_FILE} is ok',
+             status_code=200
+        )
+    except Exception as e: 
+        return func.HttpResponse(
+            f'Error in file {VOCABULARY_FILE} at row_no {rowno}:{e}',
+             status_code=500
+        )
