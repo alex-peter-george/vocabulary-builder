@@ -6,6 +6,5 @@ __queuestorage__
 local.settings.json
 test
 .venv
-requirements.txt
 utilities.py
 data/source_files/*

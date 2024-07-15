@@ -17,18 +17,16 @@ import asyncio
 import re
 import numpy as np
 
-load_dotenv()  # take environment variables from .env.
-
 app = func.FunctionApp(http_auth_level=func.AuthLevel.FUNCTION)
-VOCABULARY_FILE = 'data/VOCABULARY.csv'
 
+load_dotenv()  # take environment variables from .env.
+VOCABULARY_FILE = 'data/VOCABULARY.csv'
+embed_model_deployment_name = os.getenv('EMBED_MODEL_DEPLOYMENT_NAME')
 client = AzureOpenAI(
   api_key = os.getenv('AZURE_OPENAI_EMBED_API_KEY'),  
   api_version = os.getenv('AZURE_OPENAI_EMBED_API_VERSION'),
   azure_endpoint = os.getenv('AZURE_OPENAI_EMBED_ENDPOINT')
 )
-
-embed_model_deployment_name = os.getenv('EMBED_MODEL_DEPLOYMENT_NAME')
 
 # s is input text
 def normalize_text(s, sep_token = " \n "):
@@ -410,3 +408,5 @@ def calculate_similarity(req: func.HttpRequest) -> func.HttpResponse:
         body=json_data,
         mimetype="application/json",
         status_code=200)
+
+
