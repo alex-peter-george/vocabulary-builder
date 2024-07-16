@@ -52,22 +52,23 @@ def build_word_vocabulary():
 def validate_file_content():
     try:
         with open('data/VOCABULARY.csv', 'r') as file:
-            # Create a CSV reader
-            reader = csv.reader(file)
             rowno = 2
-            # Loop over each row in the file
             skipfirst = True
-            for row in reader:
+            for line in file:
+                # Loop over each row in the file
                 if skipfirst:
                     skipfirst = False
                     continue
+                row = line.replace('\n','').split(',')
                 item = {}
                 item['word'] = row[0]
                 item['stem'] = row[1]
                 rowno += 1
-        return 'File is ok.'
+        print(f'File has {rowno - 1} vocabular entries.')
     except Exception as e:
-        return f'Error at row_no {rowno}:{e}'
+        print(f'Error at line {line}:{e}')
+    finally:
+        return
 
 if __name__ == "__main__":
     COMMAND = 'VALIDATEFILE'

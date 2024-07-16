@@ -94,27 +94,26 @@ async def asyncpostreq(url,headers=None,payloadstr=None,verb = "get"):
 ##### Azure functions definitions ###################################################################
 
 @app.route(route="expression_list", auth_level=func.AuthLevel.FUNCTION)
-def expression_list(req: func.HttpRequest) -> func.HttpResponse:
+def expression_list(req: func.HttpRequest, context: func.Context) -> func.HttpResponse:
     if os.getenv("ENVIRONMENT") == "development":
         print(f'HTTP trigger function {inspect.currentframe().f_code.co_name} processed a request.')
     else:
         logging.info(f'HTTP trigger function {inspect.currentframe().f_code.co_name} processed a request.')
 
     result = []
-    with open(VOCABULARY_FILE, 'r') as file:
-        # Create a CSV reader
-        reader = csv.reader(file)
-    
+    VOCABULARY_FILEPATH = f'{context.function_directory}/data/VOCABULARY.csv'
+    with open(VOCABULARY_FILEPATH, 'r',encoding='utf-8', errors='ignore') as file:
         # Loop over each row in the file
         skipfirst = True
-        for row in reader:
+        for line in file:
             if skipfirst:
                 skipfirst = False
                 continue
-            item = {}
-            item['word'] = row[1]
-            item['stem'] = row[2]
-            result.append(item)
+            row = line.replace('\n','').split(',')
+            if ' ' in row[0]:
+                item = {}
+                item['expression'] = row[0]
+                result.append(item)
 
     # Serialize data to JSON
     json_data = json.dumps(result)
@@ -126,7 +125,7 @@ def expression_list(req: func.HttpRequest) -> func.HttpResponse:
         status_code=200)
 
 @app.route(route="random_expression", auth_level=func.AuthLevel.FUNCTION)
-def random_expression(req: func.HttpRequest) -> func.HttpResponse:
+def random_expression(req: func.HttpRequest,context: func.Context) -> func.HttpResponse:
     if os.getenv("ENVIRONMENT") == "development":
         print(f'HTTP trigger function {inspect.currentframe().f_code.co_name} processed a request.')
     else:
@@ -134,17 +133,16 @@ def random_expression(req: func.HttpRequest) -> func.HttpResponse:
 
     result = []
     rowno = 0
+    VOCABULARY_FILEPATH = f'{context.function_directory}/data/VOCABULARY.csv'
     try:
-        with open(VOCABULARY_FILE, 'r') as file:
-            # Create a CSV reader
-            reader = csv.reader(file)
-        
+        with open(VOCABULARY_FILEPATH, 'r',encoding='utf-8', errors='ignore') as file:
             # Loop over each row in the file
             skipfirst = True
-            for row in reader:
+            for line in file:
                 if skipfirst:
                     skipfirst = False
                     continue
+                row = line.replace('\n','').split(',')
                 item = {}
                 item['word'] = row[0]
                 item['stem'] = row[1]
@@ -335,26 +333,25 @@ def word_stemming(req: func.HttpRequest) -> func.HttpResponse:
         status_code=200)
 
 @app.route(route="vocabulary_entries_count", auth_level=func.AuthLevel.FUNCTION)
-def vocabulary_entries_count(req: func.HttpRequest) -> func.HttpResponse:
+def vocabulary_entries_count(req: func.HttpRequest,context: func.Context) -> func.HttpResponse:
     if os.getenv("ENVIRONMENT") == "development":
         print(f'HTTP trigger function {inspect.currentframe().f_code.co_name} processed a request.')
     else:
         logging.info(f'HTTP trigger function {inspect.currentframe().f_code.co_name} processed a request.')
     
-    with open('data/VOCABULARY.csv', 'r') as file:
+    VOCABULARY_FILEPATH = f'{context.function_directory}/data/VOCABULARY.csv'
+    with open(VOCABULARY_FILEPATH, 'r',encoding='utf-8', errors='ignore') as file:
         
         words_no = 0
         expressions_no = 0
-        
-        # Create a CSV reader
-        reader = csv.reader(file)
-            
+                    
         # Loop over each row in the file
         skipfirst = True
-        for row in reader:
+        for line in file:
             if skipfirst:
                 skipfirst = False
                 continue
+            row = line.replace('\n','').split(',')
             if ' ' in row[0]:
                 expressions_no = expressions_no + 1
             else:
@@ -410,34 +407,45 @@ def calculate_similarity(req: func.HttpRequest) -> func.HttpResponse:
         status_code=200)
 
 @app.route(route="validate_file_content", auth_level=func.AuthLevel.FUNCTION)
-def validate_file_content(req: func.HttpRequest) -> func.HttpResponse:
+def validate_file_content(req: func.HttpRequest, context: func.Context) -> func.HttpResponse:
     if os.getenv("ENVIRONMENT") == "development":
         print(f'HTTP trigger function {inspect.currentframe().f_code.co_name} processed a request.')
     else:
         logging.info(f'HTTP trigger function {inspect.currentframe().f_code.co_name} processed a request.')
 
-    VOCABULARY_FILE = 'data/VOCABULARY.csv'
+    VOCABULARY_FILEPATH = f'{context.function_directory}/data/VOCABULARY.csv'
+    file_info = os.stat(VOCABULARY_FILEPATH)
+    words_content = ''
     try:
-        with open(f'{VOCABULARY_FILE}', 'r') as file:
-            # Create a CSV reader
-            reader = csv.reader(file)
+        with open(VOCABULARY_FILEPATH, 'r',encoding='utf-8', errors='ignore') as file:
             rowno = 2
-            # Loop over each row in the file
             skipfirst = True
-            for row in reader:
+            for line in file:
+                # Loop over each row in the file
                 if skipfirst:
                     skipfirst = False
                     continue
-                item = {}
-                item['word'] = row[0]
-                item['stem'] = row[1]
+                row = line.replace('\n','').split(',')
+                words_content += f'{row[0]} * '
                 rowno += 1
         return func.HttpResponse(
-             f'Content of file {VOCABULARY_FILE} is ok',
+             f'Vocabulary file path is: {VOCABULARY_FILEPATH}. File size is: {file_info.st_size} bytes. File has {rowno - 1} entries. List of words: {words_content}',
              status_code=200
         )
     except Exception as e: 
         return func.HttpResponse(
-            f'Error in file {VOCABULARY_FILE} at row_no {rowno}:{e}',
+            f'Error in file {VOCABULARY_FILEPATH} at row_no {rowno}:{e}',
              status_code=500
         )
+
+@app.route(route="validate_vocabularyfile_path", auth_level=func.AuthLevel.FUNCTION)
+def validate_vocabularyfile_path(req: func.HttpRequest, context:func.Context) -> func.HttpResponse:
+    logging.info('Python HTTP trigger function processed a request.')
+
+    VOCABULARY_FILEPATH = f'{context.function_directory}/data/VOCABULARY.csv'
+    file_info = os.stat(VOCABULARY_FILEPATH)
+    
+    return func.HttpResponse(
+            f'Vocabulary file path is: {VOCABULARY_FILEPATH}. File size is: {file_info.st_size} bytes.',
+            status_code=200
+    )
