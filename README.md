@@ -52,7 +52,7 @@ Based on the presentation at [Coding Shorts: Deploy to Static Web Apps without G
 * Run `swa login` to login to Azure, to the proper subscription and tenant; the settings are saved in the newly created .env file
 * Configure the tool by running `swa` in the command terminal; check the settings to be correct
 * Answer 'no' to request for deploy, then inspect the content of *swa-cli.config.json* file
-* Run `swa deploy` in terminal window; upon 'no project found' message, we will need to provide the *deployment token*
+* Run `swa deploy --deployment-token <token> --env production` in terminal window; get the *deployment token* from Azure Portal, under *Managed Deployment Tokens* tab
 * Go to *Azure Portal* and get the managed deployment token from the static web app created there
 * Go back to terminal windows and run `swa deploy --deployment-token <managed-token-string>`; swa is deployed in **preview** environment in Azure* 
 
