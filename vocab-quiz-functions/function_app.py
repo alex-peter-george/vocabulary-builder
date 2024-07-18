@@ -16,6 +16,8 @@ import aiohttp
 import asyncio
 import re
 import numpy as np
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
 
 app = func.FunctionApp(http_auth_level=func.AuthLevel.FUNCTION)
 
@@ -27,6 +29,8 @@ client = AzureOpenAI(
   api_version = os.getenv('AZURE_OPENAI_EMBED_API_VERSION'),
   azure_endpoint = os.getenv('AZURE_OPENAI_EMBED_ENDPOINT')
 )
+# next setting can be either 'tf-idf' or 'embeddings'
+text_mining_algorithm = os.getenv('TEXT_MINING_ALGORITHM')
 
 # s is input text
 def normalize_text(s, sep_token = " \n "):
@@ -46,7 +50,7 @@ def cosine_similarity_np(a, b):
 def generate_embeddings(text, model): 
     return client.embeddings.create(input = [text], model=model).data[0].embedding
 
-def get_similarity_score(user_query,target_text):
+def get_similarity_with_embeddings(user_query,target_text):
     e_user_query = generate_embeddings(
         user_query,
         model=os.getenv('EMBED_MODEL_DEPLOYMENT_NAME')
@@ -60,6 +64,14 @@ def get_similarity_score(user_query,target_text):
     similarity_score = cosine_similarity_np(e_target_text, e_user_query)
 
     return similarity_score
+
+def get_similarity_with_tfidf(user_query,target_text):
+    vectorizer = TfidfVectorizer().fit_transform([user_query, target_text])
+    vectors = vectorizer.toarray()
+
+    cossim = cosine_similarity(vectors)
+
+    return cossim[0,1]
 
 # get free photo links
 # https://unsplash.com/developers
@@ -95,6 +107,7 @@ async def asyncpostreq(url,headers=None,payloadstr=None,verb = "get"):
 
 @app.route(route="expression_list", auth_level=func.AuthLevel.FUNCTION)
 def expression_list(req: func.HttpRequest, context: func.Context) -> func.HttpResponse:
+    # ENVIRONMENT setting can be either 'development' or 'production'
     if os.getenv("ENVIRONMENT") == "development":
         print(f'HTTP trigger function {inspect.currentframe().f_code.co_name} processed a request.')
     else:
@@ -389,12 +402,21 @@ def calculate_similarity(req: func.HttpRequest) -> func.HttpResponse:
         mimetype="application/json",
         status_code=500)
 
-    # calculate dictionary similarity score
-    dictSimilarity = get_similarity_score(userDefinition,dictDefinition)
+    # calculate dictionary and OpenAI similarity scores
+    dictSimilarity = None
+    if text_mining_algorithm == "tf-idf":
+        dictSimilarity = get_similarity_with_tfidf(userDefinition,dictDefinition)
+        openAiSimilarity = get_similarity_with_tfidf(userDefinition,openaiDefinition)
+    elif text_mining_algorithm == "embeddings":
+        dictSimilarity = get_similarity_with_embeddings(userDefinition,dictDefinition)
+        openAiSimilarity = get_similarity_with_embeddings(userDefinition,openaiDefinition)
 
-    # calculate OpenAI similarity score
-    openAiSimilarity = get_similarity_score(userDefinition,openaiDefinition)
-    
+    if dictSimilarity == None:
+        return func.HttpResponse(
+            f'No TEXT_MINING_ALGORITHM environment setting specified. Can be either "tf-idf" or "embeddings"',
+             status_code=500
+        )    
+
     scores = {"dicSimilarity": round(dictSimilarity,2), "openAiSimilarity" : round(openAiSimilarity,2)}
 
     # Serialize data to JSON

@@ -77,7 +77,7 @@ def calculate_texts_similarity():
     # that operate on text vectors generated through methods like TF-IDF or word embeddings. 
 
     # text1 = "Stoop means the staircase and landing or porch leading to the entrance of a residence."
-    text1 = "A porch or staircase in a building"
+    text1 = "No clue" #"A porch or staircase in a building"
     text2 = "A small porch, staircase, or platform at the entrance to a house or building."
  
     vectorizer = TfidfVectorizer().fit_transform([text1, text2])
