@@ -140,3 +140,5 @@ documents.json
 
 # Knowledge base and documentation
 knowledge_base/
+algorithm
+unit_tests.py

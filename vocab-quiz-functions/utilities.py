@@ -6,8 +6,6 @@ import argparse
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
-COMMAND = 'PREPDATA'
-
 def in_venv_active():
     is_active = (sys.prefix != sys.base_prefix)
     print(is_active)
@@ -72,37 +70,10 @@ def validate_file_content():
     finally:
         return
 
-def calculate_texts_similarity():
-    # To calculate the similarity between two texts, we typically use techniques such as cosine similarity or Jaccard similarity 
-    # that operate on text vectors generated through methods like TF-IDF or word embeddings. 
-
-    # text1 = "Stoop means the staircase and landing or porch leading to the entrance of a residence."
-    text1 = "No clue" #"A porch or staircase in a building"
-    text2 = "A small porch, staircase, or platform at the entrance to a house or building."
- 
-    vectorizer = TfidfVectorizer().fit_transform([text1, text2])
-    vectors = vectorizer.toarray()
-
-    cossim = cosine_similarity(vectors)
-    print(f"The cosine similarity between the two texts is: {cossim[0,1]}")
-
-    set1 = set(text1.split())
-    set2 = set(text2.split())
-
-    intersection = set1.intersection(set2)
-    union = set1.union(set2)
-    jacsim =  len(intersection) / len(union)
-    print(f"The Jaccard similarity between the two texts is: {jacsim}")
-
 if __name__ == "__main__":
-    COMMAND = 'TEXTSIMILARITY'
-    if (COMMAND == 'PREPDATA'):
-        build_word_vocabulary()
-    elif (COMMAND == 'VALIDATEFILE'):
-        validate_file_content()
-    elif (COMMAND == 'TEXTSIMILARITY'):
-        calculate_texts_similarity()
-
+    build_word_vocabulary()
+    validate_file_content()
+    
     
 
  

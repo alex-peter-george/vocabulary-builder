@@ -9,3 +9,4 @@ test
 utilities.py
 data/source_files/*
 knowledge_base/
+unit_tests.py
