@@ -160,7 +160,11 @@ export class AppComponent implements OnInit {
     this.dataService.postDictionaryDef(this.selectedExpression.word, environment.DICTIONARYDEFURL).then(
         response => {
           console.log('[OK][Angular client] Data received:', response);
-          this.freeDictionaryDef = response["meanings"];
+          this.freeDictionaryDef = response["meanings"]
+          if (response['examples'].length > 0)
+            this.freeDictionaryDef += '\nExamples:\n' + response['examples'];
+          if (response['synonyms'].length > 0)
+            this.freeDictionaryDef += '\nSynonyms:\n' + response['synonyms'];
         },
         error => {
           console.log('[Bad][Angular client] Error received:', error);

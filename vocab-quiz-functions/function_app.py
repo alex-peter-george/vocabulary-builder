@@ -11,6 +11,7 @@ from dotenv import load_dotenv
 from nltk.stem import PorterStemmer
 # from nltk.tokenize import word_tokenize
 import asyncio
+import requests
 
 from modules.algorithmic_funcs import asyncpostreq, get_similarity_with_tfidf, get_similarity_with_embeddings
 
@@ -123,18 +124,24 @@ def expression_dictionary_definition(req: func.HttpRequest) -> func.HttpResponse
     try:
         # Make a GET request to the API
         # response = requests.get(f'{os.getenv("FREE_DICTIONAY_API_BASE_URL")}{expression}',verify=False)
+        requests.packages.urllib3.disable_warnings()
         response_text = asyncio.run(asyncpostreq(f'{os.getenv("FREE_DICTIONAY_API_BASE_URL")}{expression}'))
         response_json = json.loads(response_text)
-    
+   
         # Do something with 'data'
         definitions = response_json[0]['meanings'][0]['definitions']
         meanings = ''
         synonyms = ''
+        examples = ''
         for definition in definitions:
             meanings += f'{definition["definition"]}\n'
-            synonyms += '\n'.join(definition["synonyms"])
+            if 'example' in definition:
+                examples += f'{definition["example"]}\n'
+            if len(definition["synonyms"])>0:
+                synonyms += f'{definition["synonyms"]}\n'
         
         result['meanings'] = meanings
+        result['examples'] = examples
         result['synonyms'] = synonyms
                 
         # Serialize data to JSON
@@ -391,3 +398,9 @@ def validate_vocabularyfile_path(req: func.HttpRequest, context:func.Context) ->
             f'Vocabulary file path is: {VOCABULARY_FILEPATH}. File size is: {file_info.st_size} bytes.',
             status_code=200
     )
+
+
+    
+    
+
+    
